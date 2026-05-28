@@ -1,10 +1,26 @@
 <!DOCTYPE html>
-<html lang="en">
+<html xmlns:th="http://www.thymeleaf.org"
+      th:replace="~{fragments/layout/base :: layout(~{::title}, ~{::content})}">
 <head>
-    <meta charset="UTF-8">
-    <title>Title</title>
+    <title>Главная — Почасовая аренда переговорных</title>
 </head>
 <body>
 
+<div th:fragment="content">
+    <section class="hero">
+        <h1>Найдите идеальную переговорную за пару кликов</h1>
+        <p>
+            Современный сервис почасовой аренды переговорных комнат.
+            Мы объединяем лучшие пространства в вашем городе: от уютных комнат для стартапов
+            до просторных залов для корпоративных встреч.
+            Без скрытых комиссий, с мгновенным подтверждением и онлайн-бронированием.
+        </p>
+
+        <div class="hero-actions">
+            <!-- Ссылка на каталог. Позже обернём в CSS-класс .btn для центрирования -->
+            <a th:href="@{/rooms}">Искать комнату</a>
+        </div>
+    </section>
+</div>
 </body>
 </html>
