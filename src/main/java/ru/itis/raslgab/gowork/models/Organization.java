@@ -10,16 +10,22 @@ import java.util.Set;
 
 // организация
 @Entity
-@Table(name = "organizations")
+@Table(name = "organizations", indexes = {
+        @Index(name = "idx_org_city_status", columnList = "city, status"),
+        @Index(name = "idx_org_owner", columnList = "owner_id"),
+        @Index(name = "idx_org_contact_email", columnList = "contact_email")
+})
 @Getter
 @Setter
+@Builder
 @NoArgsConstructor
 @AllArgsConstructor
-@Builder
+@EqualsAndHashCode(onlyExplicitlyIncluded = true)
 public class Organization {
 
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
+    @EqualsAndHashCode.Include
     private Long id;
 
     @Column(nullable = false, length = 100)

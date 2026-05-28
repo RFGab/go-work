@@ -4,20 +4,27 @@ import jakarta.persistence.*;
 import lombok.*;
 import ru.itis.raslgab.gowork.models.enums.RoleEnum;
 
+import java.util.HashSet;
 import java.util.Set;
 
 // Пользователь (арендатор)
 @Entity
-@Table(name = "users")
+@Table(name = "users", indexes = {
+        @Index(name = "idx_users_email", columnList = "email", unique = true),
+        @Index(name = "idx_users_username", columnList = "username", unique = true),
+        @Index(name = "idx_users_role_verified", columnList = "role, is_verified")
+})
 @Getter
 @Setter
+@Builder
 @NoArgsConstructor
 @AllArgsConstructor
-@Builder
+@EqualsAndHashCode(onlyExplicitlyIncluded = true)
 public class User {
 
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
+    @EqualsAndHashCode.Include
     private Long id;
 
     @Column(nullable = false, unique = true)
@@ -48,7 +55,8 @@ public class User {
     private RoleEnum role;
 
     @OneToMany(mappedBy = "renter")
-    private Set<Booking> bookings;
+    @Builder.Default
+    private Set<Booking> bookings =  new HashSet<>();
 
 }
 

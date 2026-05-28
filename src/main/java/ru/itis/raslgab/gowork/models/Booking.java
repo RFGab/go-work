@@ -10,16 +10,23 @@ import java.time.LocalDateTime;
 
 // Бронь
 @Entity
-@Table(name = "bookings")
+@Table(name = "bookings", indexes = {
+        @Index(name = "idx_booking_room_time", columnList = "room_id, time_start, time_finish"),
+        @Index(name = "idx_booking_user_status", columnList = "renter_id, status"),
+        @Index(name = "idx_booking_status_created", columnList = "status, created_at"),
+        @Index(name = "idx_booking_qr", columnList = "qr_code_path", unique = true)
+})
 @Getter
 @Setter
+@Builder
 @NoArgsConstructor
 @AllArgsConstructor
-@Builder
+@EqualsAndHashCode(onlyExplicitlyIncluded = true)
 public class Booking {
 
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
+    @EqualsAndHashCode.Include
     private Long id;
 
     @ManyToOne()
