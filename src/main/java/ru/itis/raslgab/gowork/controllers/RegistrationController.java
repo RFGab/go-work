@@ -12,6 +12,7 @@ import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.ModelAttribute;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestMapping;
+import ru.itis.raslgab.gowork.exceptions.CreationException;
 import ru.itis.raslgab.gowork.forms.UserRegistrationForm;
 import ru.itis.raslgab.gowork.services.UserSecurityService;
 
@@ -41,17 +42,25 @@ public class RegistrationController {
             model.addAttribute("userForm", form);
             return "auth/reg";
         }
+
+
         try {
             userService.register(form);
-
         } catch (EntityExistsException e) {
-            log.error("акк с email = % уже существует", form.getEmail());
+            log.error(e.getMessage());
             form.setEmail("");
+            model.addAttribute("globalError", e.getMessage());
+            model.addAttribute("userForm", form);
+            return "auth/reg";
+        } catch (CreationException e) {
+            log.error(e.getMessage());
+            model.addAttribute("globalError", e.getMessage());
             model.addAttribute("userForm", form);
             return "auth/reg";
         }
 
         log.info("Акк успешно создан, ждем подтверждения почты");
+        //        userService.sendMailToConfirm();
 
         return "redirect:/auth/confirmEmail";
     }

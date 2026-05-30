@@ -24,11 +24,8 @@ public class SecurityConfig {
 
                 // настройка доступов
                 .authorizeHttpRequests(auth -> auth
-                        .requestMatchers("/").permitAll()
-                        .requestMatchers("/css/**", "/js/**", "/images/**", "/static/**",
-                                "/auth/**", "/organizations/**", "/rooms/**").permitAll()
-                        .requestMatchers("/admin/**").hasRole("ADMIN")
-                        .requestMatchers("/profile/**").hasAnyRole("ADMIN", "USER")
+                        .requestMatchers("/", "/auth/**").permitAll()
+                        .requestMatchers("/css/**", "/js/**", "/images/**", "/static/**").permitAll()
                         .anyRequest().authenticated()
                 )
 
