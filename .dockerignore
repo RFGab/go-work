@@ -1,0 +1,9 @@
+target/*
+!target/*.war
+.git/
+.idea/
+.vscode/
+logs/
+.env
+*.iml
+HELP.md

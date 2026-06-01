@@ -18,6 +18,9 @@ public class UserRegistrationForm {
     @NotBlank(message = "Email обязателен")
     private String email;
 
+    @NotBlank(message = "Не введен код подтверждения")
+    private String emailConfirmationCode;
+
     @NotBlank(message = "Пароль обязателен")
     @Size(min = 6, message = "Пароль минимум 6 символов")
     private String password;

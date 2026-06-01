@@ -11,7 +11,7 @@ import java.util.Set;
 // организация
 @Entity
 @Table(name = "organizations", indexes = {
-        @Index(name = "idx_org_city_status", columnList = "city, status"),
+        @Index(name = "idx_org_city_status", columnList = "city_id, status"),
         @Index(name = "idx_org_owner", columnList = "owner_id"),
         @Index(name = "idx_org_contact_email", columnList = "contact_email")
 })

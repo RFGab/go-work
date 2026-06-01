@@ -1,0 +1,4 @@
+2026-06-01 08:35:43.753 INFO  [http-nio-8080-exec-5] USER_ACTIONS - userId=1 action=PROFILE_OPEN details=Profile page opened
+2026-06-01 08:35:53.002 INFO  [http-nio-8080-exec-7] USER_ACTIONS - userId=1 action=PROFILE_UPDATE_SUCCESS details=Profile updated
+2026-06-01 08:35:53.026 INFO  [http-nio-8080-exec-8] USER_ACTIONS - userId=1 action=PROFILE_OPEN details=Profile page opened
+2026-06-01 08:36:07.009 INFO  [http-nio-8080-exec-3] USER_ACTIONS - userId=1 action=PROFILE_OPEN details=Profile page opened

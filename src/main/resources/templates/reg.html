@@ -1,0 +1,172 @@
+<!-- src/main/resources/templates/auth/register.html -->
+<!DOCTYPE html>
+<html lang="ru" xmlns:th="http://www.thymeleaf.org">
+<head th:replace="~{fragments/base :: head(title='Регистрация')}"></head>
+<body>
+
+<header th:replace="~{fragments/base :: header}"></header>
+
+<main class="container" th:replace="~{fragments/base :: main}">
+    <div th:replace="${content}">
+
+        <div class="row justify-content-center">
+            <div class="col-md-6 col-lg-5">
+                <h2 class="text-center mb-4">Регистрация</h2>
+
+                <!-- Глобальная ошибка -->
+                <div th:if="${globalError}" class="alert alert-danger" th:text="${globalError}"></div>
+
+                <form th:action="@{/auth/register}" th:object="${userForm}" method="post">
+
+                    <!-- Email + кнопка получения кода -->
+                    <div class="mb-3">
+                        <label for="email" class="form-label">Email</label>
+                        <div class="input-group">
+                            <input type="email"
+                                   class="form-control"
+                                   id="email"
+                                   th:field="*{email}"
+                                   placeholder="you@example.com"
+                                   th:classappend="${#fields.hasErrors('email')} ? 'is-invalid'">
+                            <button type="button"
+                                    class="btn btn-outline-secondary"
+                                    id="sendCodeBtn"
+                                    onclick="sendConfirmationCode()">
+                                Получить код
+                            </button>
+                        </div>
+                        <div class="invalid-feedback" th:if="${#fields.hasErrors('email')}" th:errors="*{email}"></div>
+                        <div id="codeStatus" class="form-text"></div>
+                    </div>
+
+                    <!-- Код подтверждения -->
+                    <div class="mb-3">
+                        <label for="emailConfirmationCode" class="form-label">Код из письма</label>
+                        <input type="text"
+                               class="form-control"
+                               id="emailConfirmationCode"
+                               th:field="*{emailConfirmationCode}"
+                               placeholder="123456"
+                               maxlength="6"
+                               th:classappend="${#fields.hasErrors('emailConfirmationCode')} ? 'is-invalid'">
+                        <div class="invalid-feedback" th:if="${#fields.hasErrors('emailConfirmationCode')}" th:errors="*{emailConfirmationCode}"></div>
+                    </div>
+
+                    <!-- Пароль -->
+                    <div class="mb-3">
+                        <label for="password" class="form-label">Пароль</label>
+                        <input type="password"
+                               class="form-control"
+                               id="password"
+                               th:field="*{password}"
+                               th:classappend="${#fields.hasErrors('password')} ? 'is-invalid'">
+                        <div class="invalid-feedback" th:if="${#fields.hasErrors('password')}" th:errors="*{password}"></div>
+                    </div>
+
+                    <!-- Подтверждение пароля -->
+                    <div class="mb-3">
+                        <label for="confirmPassword" class="form-label">Повторите пароль</label>
+                        <input type="password"
+                               class="form-control"
+                               id="confirmPassword"
+                               th:field="*{confirmPassword}"
+                               th:classappend="${#fields.hasErrors('confirmPassword')} ? 'is-invalid'">
+                        <div class="invalid-feedback" th:if="${#fields.hasErrors('confirmPassword')}" th:errors="*{confirmPassword}"></div>
+                    </div>
+
+                    <!-- Имя / Фамилия / Телефон -->
+                    <div class="row">
+                        <div class="col-md-6 mb-3">
+                            <label for="firstName" class="form-label">Имя</label>
+                            <input type="text" class="form-control" th:field="*{firstName}" th:classappend="${#fields.hasErrors('firstName')} ? 'is-invalid'">
+                            <div class="invalid-feedback" th:if="${#fields.hasErrors('firstName')}" th:errors="*{firstName}"></div>
+                        </div>
+                        <div class="col-md-6 mb-3">
+                            <label for="lastName" class="form-label">Фамилия</label>
+                            <input type="text" class="form-control" th:field="*{lastName}" th:classappend="${#fields.hasErrors('lastName')} ? 'is-invalid'">
+                            <div class="invalid-feedback" th:if="${#fields.hasErrors('lastName')}" th:errors="*{lastName}"></div>
+                        </div>
+                    </div>
+
+                    <div class="mb-3">
+                        <label for="phone" class="form-label">Телефон</label>
+                        <input type="tel" class="form-control" th:field="*{phone}" th:classappend="${#fields.hasErrors('phone')} ? 'is-invalid'">
+                        <div class="invalid-feedback" th:if="${#fields.hasErrors('phone')}" th:errors="*{phone}"></div>
+                    </div>
+
+                    <!-- Кнопка регистрации -->
+                    <button type="submit" class="btn btn-primary w-100">Зарегистрироваться</button>
+                </form>
+
+                <p class="text-center mt-3">
+                    Уже есть аккаунт? <a th:href="@{/auth/login}">Войти</a>
+                </p>
+            </div>
+        </div>
+
+    </div>
+</main>
+
+<footer th:replace="~{fragments/base :: footer}"></footer>
+
+<!-- Скрипт для AJAX + CSRF -->
+<script th:inline="javascript">
+    // Читаем CSRF из meta-тегов (уже есть в base.html)
+    const csrfToken = document.querySelector('meta[name="_csrf"]')?.content;
+    const csrfHeader = document.querySelector('meta[name="_csrf_header"]')?.content;
+
+    async function sendConfirmationCode() {
+        const emailInput = document.getElementById('email');
+        const statusDiv = document.getElementById('codeStatus');
+        const btn = document.getElementById('sendCodeBtn');
+
+        const email = emailInput.value.trim();
+
+        // Простая валидация на клиенте
+        if (!email || !email.includes('@')) {
+            statusDiv.textContent = 'Введите корректный email';
+            statusDiv.className = 'form-text text-danger';
+            return;
+        }
+
+        // Блокируем кнопку
+        btn.disabled = true;
+        btn.textContent = 'Отправка...';
+        statusDiv.textContent = '';
+
+        try {
+            const response = await fetch(`/auth/confirmMail/${encodeURIComponent(email)}`, {
+                method: 'POST',  // ⚠️ Важно: POST, а не GET!
+                headers: {
+                    'Content-Type': 'application/json',
+                    [csrfHeader]: csrfToken  // CSRF в заголовке
+                },
+                credentials: 'same-origin'  // Куки сессии
+            });
+
+            if (response.ok) {
+                statusDiv.textContent = '✅ Код отправлен на почту';
+                statusDiv.className = 'form-text text-success';
+                // Опционально: разблокировать поле ввода кода
+                document.getElementById('emailConfirmationCode').focus();
+            } else {
+                const errorData = await response.json().catch(() => ({}));
+                statusDiv.textContent = errorData.error || '❌ Ошибка отправки кода';
+                statusDiv.className = 'form-text text-danger';
+            }
+        } catch (err) {
+            console.error('AJAX error:', err);
+            statusDiv.textContent = '❌ Ошибка сети';
+            statusDiv.className = 'form-text text-danger';
+        } finally {
+            // Разблокируем кнопку через 30 сек (защита от спама)
+            setTimeout(() => {
+                btn.disabled = false;
+                btn.textContent = 'Получить код';
+            }, 30000);
+        }
+    }
+</script>
+
+</body>
+</html>

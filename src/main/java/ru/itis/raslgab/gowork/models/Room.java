@@ -14,8 +14,8 @@ import java.util.Set;
 @Entity
 @Table(name = "rooms", indexes = {
         @Index(name = "idx_room_org_status", columnList = "organization_id, status"),
-        @Index(name = "idx_room_city_price", columnList = "city, price_per_hour"),
-        @Index(name = "idx_room_capacity", columnList = "capacity")
+        @Index(name = "idx_room_price_capacity", columnList = "price_per_hour, people_capacity"),
+        @Index(name = "idx_room_capacity", columnList = "people_capacity")
 })
 @Getter
 @Setter
@@ -78,4 +78,3 @@ public class Room {
     private Set<Booking> bookings;
 
 }
-

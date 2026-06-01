@@ -12,9 +12,8 @@ import java.time.LocalDateTime;
 @Entity
 @Table(name = "bookings", indexes = {
         @Index(name = "idx_booking_room_time", columnList = "room_id, time_start, time_finish"),
-        @Index(name = "idx_booking_user_status", columnList = "renter_id, status"),
-        @Index(name = "idx_booking_status_created", columnList = "status, created_at"),
-        @Index(name = "idx_booking_qr", columnList = "qr_code_path", unique = true)
+        @Index(name = "idx_booking_user_status", columnList = "user_id, status"),
+        @Index(name = "idx_booking_status_created", columnList = "status, created_at")
 })
 @Getter
 @Setter
@@ -48,7 +47,7 @@ public class Booking {
     private Integer numOfPeople; // сколько людей
 
     @Column()
-    private String comment; // коммент пожелание (опционально)
+    private String comment; // коммент пожелание
 
     @Enumerated(EnumType.STRING)
     @Column(nullable = false, length = 20)
@@ -63,4 +62,3 @@ public class Booking {
     private LocalDateTime createdAt;
 
 }
-

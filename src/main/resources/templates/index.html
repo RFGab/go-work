@@ -1,26 +1,63 @@
+<!-- src/main/resources/templates/index.html -->
 <!DOCTYPE html>
-<html xmlns:th="http://www.thymeleaf.org"
-      th:replace="~{fragments/layout/base :: layout(~{::title}, ~{::content})}">
+<html lang="ru" xmlns:th="http://www.thymeleaf.org"
+      xmlns:layout="http://www.ultraq.net.nz/thymeleaf/layout"
+      th:replace="~{fragments/base :: html(title=~{::title}, content=~{::main})}">
+
 <head>
-    <title>Главная — Почасовая аренда переговорных</title>
+    <title>GoWork — Аренда переговорных комнат</title>
 </head>
+
 <body>
+<main>
+    <section class="text-center py-5">
+        <h1 class="display-6 fw-bold mb-3">Найдите идеальное пространство для работы</h1>
+        <p class="text-muted mb-4">Почасовая аренда переговорных комнат в вашем городе</p>
 
-<div th:fragment="content">
-    <section class="hero">
-        <h1>Найдите идеальную переговорную за пару кликов</h1>
-        <p>
-            Современный сервис почасовой аренды переговорных комнат.
-            Мы объединяем лучшие пространства в вашем городе: от уютных комнат для стартапов
-            до просторных залов для корпоративных встреч.
-            Без скрытых комиссий, с мгновенным подтверждением и онлайн-бронированием.
-        </p>
+        <!-- Простая форма поиска (будет работать через классический GET-запрос) -->
+        <form th:action="@{/rooms}" method="get" class="row justify-content-center g-2 mb-4">
+            <div class="col-auto">
+                <input type="number" name="capacity" class="form-control" placeholder="Вместимость" min="1" aria-label="Вместимость">
+            </div>
+            <div class="col-auto">
+                <button type="submit" class="btn btn-primary">Найти</button>
+            </div>
+        </form>
+    </section>
 
-        <div class="hero-actions">
-            <!-- Ссылка на каталог. Позже обернём в CSS-класс .btn для центрирования -->
-            <a th:href="@{/rooms}">Искать комнату</a>
+    <!-- Блок "Популярные комнаты" (заглушка, данные подтянем позже) -->
+    <section class="mb-5">
+        <h2 class="h4 mb-3">Популярные комнаты</h2>
+        <div class="row g-3">
+            <!-- Карточка-заглушка (3 шт., как в ТЗ: "3 похожие комнаты") -->
+            <div class="col-md-4" th:each="i : ${#numbers.sequence(1, 3)}">
+                <div class="card h-100 border-0 shadow-sm">
+                    <div class="card-body">
+                        <h5 class="card-title">Переговорная #<th:block th:text="${i}"/></h5>
+                        <p class="card-text text-muted small">Центр города • до 10 человек</p>
+                        <p class="card-text fw-bold">от 500 ₽/час</p>
+                        <a th:href="@{/rooms/{id}(id=${i})}" class="btn btn-outline-primary btn-sm">Подробнее</a>
+                    </div>
+                </div>
+            </div>
         </div>
     </section>
-</div>
+
+    <!-- Информационный блок -->
+    <section class="row g-4 mb-5">
+        <div class="col-md-4">
+            <h3 class="h5">🔒 Безопасно</h3>
+            <p class="small text-muted">Подтверждение бронирования через владельца и QR-код</p>
+        </div>
+        <div class="col-md-4">
+            <h3 class="h5">⚡ Быстро</h3>
+            <p class="small text-muted">Мгновенный поиск и онлайн-календарь доступности</p>
+        </div>
+        <div class="col-md-4">
+            <h3 class="h5">📍 Удобно</h3>
+            <p class="small text-muted">Комнаты в разных районах вашего города</p>
+        </div>
+    </section>
+</main>
 </body>
 </html>

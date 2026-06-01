@@ -1,0 +1,71 @@
+<!DOCTYPE html>
+<html lang="ru" xmlns:th="http://www.thymeleaf.org"
+      th:replace="~{fragments/base :: html(title=~{::title}, content=~{::main})}">
+<head>
+    <title>GoWork - Profile</title>
+</head>
+<body>
+<main>
+    <div class="row g-4">
+        <section class="col-lg-7">
+            <h1 class="h3 mb-4">Профиль</h1>
+
+            <div th:if="${successMessage}" class="alert alert-success" th:text="${successMessage}"></div>
+
+            <form th:action="@{/profile}" th:object="${profileForm}" method="post" class="vstack gap-3">
+                <input type="hidden" th:field="*{id}">
+
+                <div>
+                    <label for="firstName" class="form-label">Имя</label>
+                    <input id="firstName" type="text" class="form-control" th:field="*{firstName}">
+                    <div class="text-danger small" th:if="${#fields.hasErrors('firstName')}" th:errors="*{firstName}"></div>
+                </div>
+
+                <div>
+                    <label for="lastName" class="form-label">Фамилия</label>
+                    <input id="lastName" type="text" class="form-control" th:field="*{lastName}">
+                    <div class="text-danger small" th:if="${#fields.hasErrors('lastName')}" th:errors="*{lastName}"></div>
+                </div>
+
+                <div>
+                    <label for="email" class="form-label">Email</label>
+                    <input id="email" type="email" class="form-control" th:field="*{email}">
+                    <div class="text-danger small" th:if="${#fields.hasErrors('email')}" th:errors="*{email}"></div>
+                </div>
+
+                <div>
+                    <label for="phone" class="form-label">Телефон</label>
+                    <input id="phone" type="tel" class="form-control" th:field="*{phone}">
+                    <div class="text-danger small" th:if="${#fields.hasErrors('phone')}" th:errors="*{phone}"></div>
+                </div>
+
+                <div>
+                    <button type="submit" class="btn btn-primary">Сохранить изменения</button>
+                </div>
+            </form>
+        </section>
+
+        <section class="col-lg-5">
+            <div class="d-flex justify-content-between align-items-center mb-3">
+                <h2 class="h4 mb-0">Мои организации</h2>
+                <a th:href="@{/organizations/new}" class="btn btn-sm btn-outline-primary">Создать организацию</a>
+            </div>
+
+            <div th:if="${#lists.isEmpty(organizations)}" class="text-muted">
+                У вас пока нет организаций.
+            </div>
+
+            <div th:each="organization : ${organizations}" class="border rounded p-3 mb-2">
+                <div class="fw-semibold" th:text="${organization.name()}">Название</div>
+                <div class="text-muted small">
+                    <span th:text="${organization.cityName()}">Город</span>
+                    <span> · </span>
+                    <span th:text="${organization.roomCount()}">0</span>
+                    <span> комнат</span>
+                </div>
+            </div>
+        </section>
+    </div>
+</main>
+</body>
+</html>

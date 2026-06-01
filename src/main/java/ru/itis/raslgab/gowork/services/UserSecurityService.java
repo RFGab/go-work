@@ -3,11 +3,9 @@ package ru.itis.raslgab.gowork.services;
 import ru.itis.raslgab.gowork.forms.UserRegistrationForm;
 
 public interface UserSecurityService {
-    void register(UserRegistrationForm form);
+    Long register(UserRegistrationForm form);
 
-    void activate(String code);
+    String generateEmailConfirmationCode(String email);
 
-    void confirmMail(Long id);
-
-    void sendMailToConfirm(Long id);
+    boolean checkEmailConfirmationCode(String email, String code);
 }

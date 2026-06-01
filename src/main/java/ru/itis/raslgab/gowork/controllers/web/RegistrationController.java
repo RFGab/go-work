@@ -1,5 +1,4 @@
-package ru.itis.raslgab.gowork.controllers;
-
+package ru.itis.raslgab.gowork.controllers.web;
 
 import jakarta.persistence.EntityExistsException;
 import jakarta.validation.Valid;
@@ -14,6 +13,7 @@ import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestMapping;
 import ru.itis.raslgab.gowork.exceptions.CreationException;
 import ru.itis.raslgab.gowork.forms.UserRegistrationForm;
+import ru.itis.raslgab.gowork.services.UserActionLogService;
 import ru.itis.raslgab.gowork.services.UserSecurityService;
 
 @Controller
@@ -22,46 +22,49 @@ import ru.itis.raslgab.gowork.services.UserSecurityService;
 @Slf4j
 public class RegistrationController {
     private final UserSecurityService userService;
+    private final UserActionLogService userActionLogService;
 
-    @GetMapping("/reg")
-    public String registerForm(UserRegistrationForm form,
-                               Model model) {
-        log.info("Открыта страница регистрации");
+    @GetMapping("/register")
+    public String registerForm(UserRegistrationForm form, Model model) {
+        log.info("Opened registration page");
+        userActionLogService.logAnonymous("REGISTER_PAGE_OPEN", "Registration page opened");
         model.addAttribute("userForm", form);
-        return "auth/reg";
+        return "auth/register";
     }
 
-    @PostMapping("/reg")
+    @PostMapping("/register")
     public String register(@Valid @ModelAttribute("userForm") UserRegistrationForm form,
                            BindingResult bindingResult,
                            Model model) {
-        log.info("Попытка создать акк");
+        log.info("Registration attempt for email={}", form.getEmail());
 
         if (bindingResult.hasErrors()) {
-            log.error("Ошибка при валидации данных");
+            log.warn("Registration validation failed for email={}", form.getEmail());
+            userActionLogService.logAnonymous("REGISTER_FAILED", "Validation errors for email=" + form.getEmail());
             model.addAttribute("userForm", form);
-            return "auth/reg";
+            model.addAttribute("errors", bindingResult.getAllErrors());
+            return "auth/register";
         }
 
-
         try {
-            userService.register(form);
+            Long id = userService.register(form);
+            log.info("Account created with id={}", id);
+            userActionLogService.log(id, "REGISTER_SUCCESS", "Account created");
         } catch (EntityExistsException e) {
-            log.error(e.getMessage());
+            log.warn("Registration failed: email already exists");
+            userActionLogService.logAnonymous("REGISTER_FAILED", "Email already exists: " + form.getEmail());
             form.setEmail("");
             model.addAttribute("globalError", e.getMessage());
             model.addAttribute("userForm", form);
-            return "auth/reg";
+            return "auth/register";
         } catch (CreationException e) {
-            log.error(e.getMessage());
+            log.warn("Registration failed: {}", e.getMessage());
+            userActionLogService.logAnonymous("REGISTER_FAILED", e.getMessage());
             model.addAttribute("globalError", e.getMessage());
             model.addAttribute("userForm", form);
-            return "auth/reg";
+            return "auth/register";
         }
 
-        log.info("Акк успешно создан, ждем подтверждения почты");
-        //        userService.sendMailToConfirm();
-
-        return "redirect:/auth/confirmEmail";
+        return "redirect:/auth/login?registered";
     }
 }

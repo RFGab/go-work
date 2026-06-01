@@ -6,8 +6,8 @@ import lombok.*;
 
 @Entity
 @Table(name = "files", indexes = {
-        @Index(name = "idx_file_path", columnList = "file_path", unique = true),
-        @Index(name = "idx_file_type", columnList = "file_type")
+        @Index(name = "idx_file_url", columnList = "url", unique = true),
+        @Index(name = "idx_file_type", columnList = "type")
 })
 @Getter
 @Setter

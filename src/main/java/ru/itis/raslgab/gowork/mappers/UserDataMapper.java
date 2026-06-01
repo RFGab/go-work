@@ -4,8 +4,10 @@ package ru.itis.raslgab.gowork.mappers;
 import lombok.RequiredArgsConstructor;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Component;
+import ru.itis.raslgab.gowork.dto.UserProfileDto;
 import ru.itis.raslgab.gowork.forms.UserRegistrationForm;
 import ru.itis.raslgab.gowork.models.User;
+import ru.itis.raslgab.gowork.models.enums.RoleEnum;
 
 @Component
 @RequiredArgsConstructor
@@ -19,6 +21,13 @@ public class UserDataMapper {
                 .firstName(form.getFirstName())
                 .lastName(form.getLastName())
                 .phone(form.getPhone())
+                .isBlocked(false)
+                .isConfirmed(true)
+                .role(RoleEnum.USER)
                 .build();
+    }
+
+    public UserProfileDto mapToUserProfileDto(User user) {
+        return UserProfileDto.builder().build();
     }
 }
