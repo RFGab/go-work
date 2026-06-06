@@ -1,0 +1,63 @@
+<!DOCTYPE html>
+<html lang="ru" xmlns:th="http://www.thymeleaf.org"
+      th:replace="~{fragments/base :: html(title=~{::title}, content=~{::main})}">
+<head>
+    <title>GoWork - Создание организации</title>
+</head>
+<body>
+<main>
+    <section class="row justify-content-center">
+        <div class="col-lg-7">
+            <div class="d-flex justify-content-between align-items-center mb-4">
+                <h1 class="h3 mb-0">Создание организации</h1>
+                <a th:href="@{/profile}" class="btn btn-outline-secondary btn-sm">Назад в профиль</a>
+            </div>
+
+            <form th:action="@{/organizations}" th:object="${organizationForm}" method="post" class="vstack gap-3">
+                <div>
+                    <label for="name" class="form-label">Название</label>
+                    <input id="name" type="text" class="form-control" th:field="*{name}" maxlength="100">
+                    <div class="text-danger small" th:if="${#fields.hasErrors('name')}" th:errors="*{name}"></div>
+                </div>
+
+                <div>
+                    <label for="cityName" class="form-label">Город</label>
+                    <input id="cityName" type="text" class="form-control" th:field="*{cityName}">
+                    <div class="text-danger small" th:if="${#fields.hasErrors('cityName')}" th:errors="*{cityName}"></div>
+                </div>
+
+                <div>
+                    <label for="description" class="form-label">Описание</label>
+                    <textarea id="description" class="form-control" th:field="*{description}" rows="4" maxlength="1000"></textarea>
+                    <div class="text-danger small" th:if="${#fields.hasErrors('description')}" th:errors="*{description}"></div>
+                </div>
+
+                <div>
+                    <label for="yandexMapLink" class="form-label">Ссылка на Яндекс.Карты</label>
+                    <input id="yandexMapLink" type="url" class="form-control" th:field="*{yandexMapLink}">
+                    <div class="text-danger small" th:if="${#fields.hasErrors('yandexMapLink')}" th:errors="*{yandexMapLink}"></div>
+                </div>
+
+                <div class="row g-3">
+                    <div class="col-md-6">
+                        <label for="contactEmail" class="form-label">Контактный email</label>
+                        <input id="contactEmail" type="email" class="form-control" th:field="*{contactEmail}">
+                        <div class="text-danger small" th:if="${#fields.hasErrors('contactEmail')}" th:errors="*{contactEmail}"></div>
+                    </div>
+                    <div class="col-md-6">
+                        <label for="contactPhone" class="form-label">Контактный телефон</label>
+                        <input id="contactPhone" type="tel" class="form-control" th:field="*{contactPhone}">
+                        <div class="text-danger small" th:if="${#fields.hasErrors('contactPhone')}" th:errors="*{contactPhone}"></div>
+                    </div>
+                </div>
+
+                <div class="d-flex gap-2">
+                    <button type="submit" class="btn btn-primary">Создать организацию</button>
+                    <a th:href="@{/profile}" class="btn btn-outline-secondary">Отмена</a>
+                </div>
+            </form>
+        </div>
+    </section>
+</main>
+</body>
+</html>

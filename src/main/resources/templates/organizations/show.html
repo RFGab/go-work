@@ -1,0 +1,159 @@
+<!DOCTYPE html>
+<html lang="ru" xmlns:th="http://www.thymeleaf.org"
+      th:replace="~{fragments/base :: html(title=~{::title}, content=~{::main})}">
+<head>
+    <title th:text="'GoWork - ' + ${organization.name()}">GoWork - Организация</title>
+</head>
+<body>
+<main>
+    <div class="d-flex justify-content-between align-items-start gap-3 mb-4">
+        <div>
+            <h1 class="h3 mb-2" th:text="${organization.name()}">Организация</h1>
+            <div class="text-muted">
+                <span th:text="${organization.cityName()}">Город</span>
+                <span> · </span>
+                <span th:text="'Владелец: ' + ${organization.ownerFullName()}">Владелец</span>
+            </div>
+        </div>
+        <span class="badge text-bg-secondary fs-6" th:text="${organization.status()}">ACTIVE</span>
+    </div>
+
+    <div th:if="${successMessage}" class="alert alert-success" th:text="${successMessage}"></div>
+    <div th:if="${errorMessage}" class="alert alert-danger" th:text="${errorMessage}"></div>
+
+    <div class="row g-4">
+        <section class="col-lg-7">
+            <h2 class="h4 mb-3">Информация</h2>
+
+            <form th:if="${organization.owner()}"
+                  th:action="@{/organizations/{id}(id=${organization.id()})}"
+                  th:object="${organizationForm}"
+                  method="post"
+                  class="vstack gap-3">
+                <input type="hidden" th:field="*{id}">
+
+                <div>
+                    <label for="name" class="form-label">Название</label>
+                    <input id="name" type="text" class="form-control" th:field="*{name}" maxlength="100">
+                    <div class="text-danger small" th:if="${#fields.hasErrors('name')}" th:errors="*{name}"></div>
+                </div>
+
+                <div>
+                    <label for="cityName" class="form-label">Город</label>
+                    <input id="cityName" type="text" class="form-control" th:field="*{cityName}">
+                    <div class="text-danger small" th:if="${#fields.hasErrors('cityName')}" th:errors="*{cityName}"></div>
+                </div>
+
+                <div>
+                    <label for="description" class="form-label">Описание</label>
+                    <textarea id="description" class="form-control" th:field="*{description}" rows="4" maxlength="1000"></textarea>
+                    <div class="text-danger small" th:if="${#fields.hasErrors('description')}" th:errors="*{description}"></div>
+                </div>
+
+                <div>
+                    <label for="yandexMapLink" class="form-label">Ссылка на Яндекс.Карты</label>
+                    <input id="yandexMapLink" type="url" class="form-control" th:field="*{yandexMapLink}">
+                </div>
+
+                <div class="row g-3">
+                    <div class="col-md-6">
+                        <label for="contactEmail" class="form-label">Контактный email</label>
+                        <input id="contactEmail" type="email" class="form-control" th:field="*{contactEmail}">
+                        <div class="text-danger small" th:if="${#fields.hasErrors('contactEmail')}" th:errors="*{contactEmail}"></div>
+                    </div>
+                    <div class="col-md-6">
+                        <label for="contactPhone" class="form-label">Контактный телефон</label>
+                        <input id="contactPhone" type="tel" class="form-control" th:field="*{contactPhone}">
+                    </div>
+                </div>
+
+                <div>
+                    <button type="submit" class="btn btn-primary">Сохранить</button>
+                </div>
+            </form>
+
+            <dl th:unless="${organization.owner()}" class="row">
+                <dt class="col-sm-4">Название</dt>
+                <dd class="col-sm-8" th:text="${organization.name()}">Название</dd>
+
+                <dt class="col-sm-4">Город</dt>
+                <dd class="col-sm-8" th:text="${organization.cityName()}">Город</dd>
+
+                <dt class="col-sm-4">Описание</dt>
+                <dd class="col-sm-8" th:text="${organization.description() ?: 'Описание не указано'}">Описание</dd>
+
+                <dt class="col-sm-4">Карта</dt>
+                <dd class="col-sm-8">
+                    <a th:if="${organization.yandexMapLink()}" th:href="${organization.yandexMapLink()}" target="_blank" rel="noopener">Открыть карту</a>
+                    <span th:unless="${organization.yandexMapLink()}" class="text-muted">Не указана</span>
+                </dd>
+
+                <dt class="col-sm-4">Email</dt>
+                <dd class="col-sm-8" th:text="${organization.contactEmail() ?: 'Не указан'}">Email</dd>
+
+                <dt class="col-sm-4">Телефон</dt>
+                <dd class="col-sm-8" th:text="${organization.contactPhone() ?: 'Не указан'}">Телефон</dd>
+            </dl>
+        </section>
+
+        <aside class="col-lg-5">
+            <div th:if="${organization.canManage()}" class="border rounded p-3 mb-4">
+                <h2 class="h5 mb-3">Управление</h2>
+
+                <form th:action="@{/organizations/{id}/status(id=${organization.id()})}" method="post" class="row g-2 align-items-end mb-3">
+                    <div class="col">
+                        <label for="status" class="form-label">Статус</label>
+                        <select id="status" name="status" class="form-select">
+                            <option th:each="status : ${statuses}"
+                                    th:value="${status}"
+                                    th:text="${status}"
+                                    th:selected="${status == organization.status()}">ACTIVE</option>
+                        </select>
+                    </div>
+                    <div class="col-auto">
+                        <button type="submit" class="btn btn-outline-primary">Изменить</button>
+                    </div>
+                </form>
+
+                <form th:action="@{/organizations/{id}/delete(id=${organization.id()})}" method="post">
+                    <button type="submit"
+                            class="btn btn-outline-danger"
+                            onclick="return confirm('Удалить организацию?')">Удалить организацию</button>
+                </form>
+            </div>
+        </aside>
+    </div>
+
+    <section class="mt-5">
+        <div class="d-flex justify-content-between align-items-center mb-3">
+            <h2 class="h4 mb-0">Комнаты</h2>
+            <a th:if="${organization.owner()}"
+               th:href="@{/organizations/{id}/rooms/new(id=${organization.id()})}"
+               class="btn btn-sm btn-outline-primary">Создать комнату</a>
+        </div>
+
+        <div th:if="${#lists.isEmpty(rooms)}" class="text-muted">
+            В этой организации пока нет комнат.
+        </div>
+
+        <div th:each="room : ${rooms}" class="border rounded p-3 mb-2">
+            <div class="d-flex justify-content-between gap-3">
+                <div>
+                    <a class="fw-semibold text-decoration-none"
+                       th:href="@{/rooms/{id}(id=${room.id()})}"
+                       th:text="${room.name()}">Комната</a>
+                    <div class="text-muted small" th:text="${room.description() ?: 'Описание не указано'}">Описание</div>
+                </div>
+                <span class="badge text-bg-light align-self-start" th:text="${room.status()}">AVAILABLE</span>
+            </div>
+            <div class="small mt-2">
+                <span th:text="${room.peopleCapacity()}">0</span>
+                <span> мест · </span>
+                <span th:text="${room.pricePerHour()}">0.00</span>
+                <span> ₽/час</span>
+            </div>
+        </div>
+    </section>
+</main>
+</body>
+</html>

@@ -20,7 +20,8 @@
             <a th:href="@{/}" class="text-decoration-none text-dark fw-bold fs-4">GoWork</a>
 
             <nav class="d-flex align-items-center gap-3">
-                <a th:href="@{/rooms}" class="text-decoration-none text-secondary">Catalog</a>
+                <a th:href="@{/rooms}" class="text-decoration-none text-secondary">Rooms</a>
+                <a th:href="@{/organizations}" class="text-decoration-none text-secondary">Organizations</a>
                 <a th:if="${#authorization.expression('isAuthenticated()')}"
                    th:href="@{/bookings/my}"
                    class="text-decoration-none text-secondary">My bookings</a>

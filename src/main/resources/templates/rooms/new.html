@@ -1,0 +1,64 @@
+<!DOCTYPE html>
+<html lang="ru" xmlns:th="http://www.thymeleaf.org"
+      th:replace="~{fragments/base :: html(title=~{::title}, content=~{::main})}">
+<head>
+    <title>GoWork - Создание комнаты</title>
+</head>
+<body>
+<main>
+    <section class="row justify-content-center">
+        <div class="col-lg-7">
+            <div class="d-flex justify-content-between align-items-center mb-4">
+                <h1 class="h3 mb-0">Создание комнаты</h1>
+                <a th:href="@{/organizations/{id}(id=${organizationId})}" class="btn btn-outline-secondary btn-sm">Назад к организации</a>
+            </div>
+
+            <form th:action="@{/organizations/{id}/rooms(id=${organizationId})}"
+                  th:object="${roomForm}"
+                  method="post"
+                  class="vstack gap-3">
+                <div>
+                    <label for="name" class="form-label">Название</label>
+                    <input id="name" type="text" class="form-control" th:field="*{name}" maxlength="30">
+                    <div class="text-danger small" th:if="${#fields.hasErrors('name')}" th:errors="*{name}"></div>
+                </div>
+
+                <div>
+                    <label for="description" class="form-label">Описание</label>
+                    <textarea id="description" class="form-control" th:field="*{description}" rows="4" maxlength="1000"></textarea>
+                    <div class="text-danger small" th:if="${#fields.hasErrors('description')}" th:errors="*{description}"></div>
+                </div>
+
+                <div class="row g-3">
+                    <div class="col-md-6">
+                        <label for="peopleCapacity" class="form-label">Вместимость</label>
+                        <input id="peopleCapacity" type="number" min="1" step="1" class="form-control" th:field="*{peopleCapacity}">
+                        <div class="text-danger small" th:if="${#fields.hasErrors('peopleCapacity')}" th:errors="*{peopleCapacity}"></div>
+                    </div>
+                    <div class="col-md-6">
+                        <label for="pricePerHour" class="form-label">Цена за час</label>
+                        <input id="pricePerHour" type="number" min="0.01" step="0.01" class="form-control" th:field="*{pricePerHour}">
+                        <div class="text-danger small" th:if="${#fields.hasErrors('pricePerHour')}" th:errors="*{pricePerHour}"></div>
+                    </div>
+                </div>
+
+                <div>
+                    <label for="status" class="form-label">Статус</label>
+                    <select id="status" class="form-select" th:field="*{status}">
+                        <option th:each="status : ${statuses}"
+                                th:value="${status}"
+                                th:text="${status}">AVAILABLE</option>
+                    </select>
+                    <div class="text-danger small" th:if="${#fields.hasErrors('status')}" th:errors="*{status}"></div>
+                </div>
+
+                <div class="d-flex gap-2">
+                    <button type="submit" class="btn btn-primary">Создать комнату</button>
+                    <a th:href="@{/organizations/{id}(id=${organizationId})}" class="btn btn-outline-secondary">Отмена</a>
+                </div>
+            </form>
+        </div>
+    </section>
+</main>
+</body>
+</html>

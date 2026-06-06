@@ -56,7 +56,9 @@
             </div>
 
             <div th:each="organization : ${organizations}" class="border rounded p-3 mb-2">
-                <div class="fw-semibold" th:text="${organization.name()}">Название</div>
+                <a class="fw-semibold text-decoration-none"
+                   th:href="@{/organizations/{id}(id=${organization.id()})}"
+                   th:text="${organization.name()}">Название</a>
                 <div class="text-muted small">
                     <span th:text="${organization.cityName()}">Город</span>
                     <span> · </span>

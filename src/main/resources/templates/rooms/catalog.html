@@ -1,0 +1,116 @@
+<!DOCTYPE html>
+<html lang="ru" xmlns:th="http://www.thymeleaf.org"
+      th:replace="~{fragments/base :: html(title=~{::title}, content=~{::main})}">
+<head>
+    <title>GoWork - Каталог комнат</title>
+</head>
+<body>
+<main>
+    <div class="d-flex justify-content-between align-items-start gap-3 mb-4">
+        <div>
+            <h1 class="h3 mb-2">Каталог комнат</h1>
+            <div class="text-muted">Комнаты отсортированы по количеству свободных часов сегодня.</div>
+        </div>
+        <a th:href="@{/organizations}" class="btn btn-outline-secondary">Организации</a>
+    </div>
+
+    <form th:action="@{/rooms}" th:object="${filter}" method="get" class="border rounded p-3 mb-4">
+        <input type="hidden" th:field="*{size}">
+        <input type="hidden" name="page" value="0">
+
+        <div class="row g-3 align-items-end">
+            <div class="col-md-4">
+                <label for="cityId" class="form-label">Город</label>
+                <select id="cityId" class="form-select" th:field="*{cityId}">
+                    <option value="">Все города</option>
+                    <option th:each="city : ${cities}"
+                            th:value="${city.id()}"
+                            th:text="${city.name()}">Город</option>
+                </select>
+            </div>
+
+            <div class="col-md-3">
+                <label for="minCapacity" class="form-label">Минимальная вместимость</label>
+                <input id="minCapacity" type="number" min="1" step="1" class="form-control" th:field="*{minCapacity}">
+                <div class="text-danger small" th:if="${#fields.hasErrors('minCapacity')}" th:errors="*{minCapacity}"></div>
+            </div>
+
+            <div class="col-md-3">
+                <div class="form-check mb-2">
+                    <input id="availableToday" type="checkbox" class="form-check-input" th:field="*{availableToday}">
+                    <label for="availableToday" class="form-check-label">Доступна сегодня</label>
+                </div>
+            </div>
+
+            <div class="col-md-2 d-flex gap-2">
+                <button type="submit" class="btn btn-primary">Показать</button>
+                <a th:href="@{/rooms}" class="btn btn-outline-secondary">Сбросить</a>
+            </div>
+        </div>
+    </form>
+
+    <div th:if="${#lists.isEmpty(rooms)}" class="alert alert-light border">
+        По выбранным фильтрам комнат пока нет.
+    </div>
+
+    <div class="row g-3">
+        <div th:each="room : ${rooms}" class="col-md-6 col-xl-4">
+            <article class="border rounded p-3 h-100">
+                <div class="d-flex justify-content-between gap-3 mb-2">
+                    <h2 class="h5 mb-0">
+                        <a th:href="@{/rooms/{id}(id=${room.id()})}"
+                           th:text="${room.name()}"
+                           class="text-decoration-none">Комната</a>
+                    </h2>
+                    <span class="badge text-bg-light" th:text="${room.status()}">AVAILABLE</span>
+                </div>
+
+                <div class="text-muted small mb-2">
+                    <a th:href="@{/organizations/{id}(id=${room.organizationId()})}"
+                       th:text="${room.organizationName()}"
+                       class="text-decoration-none">Организация</a>
+                    <span> · </span>
+                    <span th:text="${room.cityName()}">Город</span>
+                </div>
+
+                <p class="mb-3" th:text="${room.description() ?: 'Описание пока не добавлено'}">Описание</p>
+
+                <div class="small mb-3">
+                    <span th:text="${room.peopleCapacity()}">0</span>
+                    <span> мест · </span>
+                    <span th:text="${room.pricePerHour()}">0.00</span>
+                    <span> ₽/час</span>
+                </div>
+
+                <div class="fw-semibold">
+                    <span th:text="${room.availableHoursToday()}">0.00</span>
+                    <span> свободных часов сегодня</span>
+                </div>
+            </article>
+        </div>
+    </div>
+
+    <nav th:if="${roomsPage.totalPages > 1}" class="mt-4" aria-label="Навигация по страницам комнат">
+        <ul class="pagination">
+            <li class="page-item" th:classappend="${roomsPage.first} ? 'disabled'">
+                <a class="page-link"
+                   th:href="@{/rooms(cityId=${filter.cityId},availableToday=${filter.availableToday},minCapacity=${filter.minCapacity},size=${filter.safeSize()},page=${roomsPage.number - 1})}">Назад</a>
+            </li>
+
+            <li th:each="pageNumber : ${pageNumbers}"
+                class="page-item"
+                th:classappend="${pageNumber == roomsPage.number} ? 'active'">
+                <a class="page-link"
+                   th:href="@{/rooms(cityId=${filter.cityId},availableToday=${filter.availableToday},minCapacity=${filter.minCapacity},size=${filter.safeSize()},page=${pageNumber})}"
+                   th:text="${pageNumber + 1}">1</a>
+            </li>
+
+            <li class="page-item" th:classappend="${roomsPage.last} ? 'disabled'">
+                <a class="page-link"
+                   th:href="@{/rooms(cityId=${filter.cityId},availableToday=${filter.availableToday},minCapacity=${filter.minCapacity},size=${filter.safeSize()},page=${roomsPage.number + 1})}">Вперед</a>
+            </li>
+        </ul>
+    </nav>
+</main>
+</body>
+</html>

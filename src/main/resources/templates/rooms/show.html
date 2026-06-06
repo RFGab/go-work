@@ -1,0 +1,183 @@
+<!DOCTYPE html>
+<html lang="ru" xmlns:th="http://www.thymeleaf.org"
+      th:replace="~{fragments/base :: html(title=~{::title}, content=~{::main})}">
+<head>
+    <title th:text="'GoWork - ' + ${room.name}">GoWork - Комната</title>
+</head>
+<body>
+<main>
+    <div class="d-flex justify-content-between align-items-start gap-3 mb-4">
+        <div>
+            <h1 class="h3 mb-2" th:text="${room.name}">Комната</h1>
+            <div class="text-muted">
+                <a th:href="@{/organizations/{id}(id=${room.organizationId})}"
+                   th:text="${room.organizationName}"
+                   class="text-decoration-none">Организация</a>
+                <span> · </span>
+                <span th:text="${room.cityName}">Город</span>
+            </div>
+        </div>
+        <span class="badge text-bg-secondary fs-6" th:text="${room.status}">AVAILABLE</span>
+    </div>
+
+    <div th:if="${successMessage}" class="alert alert-success" th:text="${successMessage}"></div>
+
+    <div class="row g-4">
+        <section class="col-lg-8">
+            <h2 class="h4 mb-3">Информация</h2>
+
+            <dl class="row">
+                <dt class="col-sm-4">Описание</dt>
+                <dd class="col-sm-8" th:text="${room.description ?: 'Описание не указано'}">Описание</dd>
+
+                <dt class="col-sm-4">Вместимость</dt>
+                <dd class="col-sm-8">
+                    <span th:text="${room.peopleCapacity}">0</span>
+                    <span> мест</span>
+                </dd>
+
+                <dt class="col-sm-4">Цена</dt>
+                <dd class="col-sm-8">
+                    <span th:text="${room.pricePerHour}">0.00</span>
+                    <span> ₽/час</span>
+                </dd>
+
+                <dt class="col-sm-4">Доступность сегодня</dt>
+                <dd class="col-sm-8">
+                    <span th:text="${room.availableHoursToday}">0.00</span>
+                    <span> свободных часов из 24</span>
+                </dd>
+            </dl>
+
+            <section class="mt-4">
+                <h2 class="h4 mb-3">Опции</h2>
+                <div th:if="${#lists.isEmpty(options)}" class="text-muted">У комнаты пока нет указанных опций.</div>
+                <div class="d-flex flex-wrap gap-2">
+                    <span th:each="option : ${options}" class="badge text-bg-light border">
+                        <span th:text="${option.name}">Опция</span>
+                        <span class="text-muted" th:text="' · ' + ${option.category}"> · CATEGORY</span>
+                    </span>
+                </div>
+            </section>
+
+            <section class="mt-5">
+                <div class="d-flex justify-content-between align-items-end gap-3 mb-3">
+                    <div>
+                        <h2 class="h4 mb-1">Заявка на бронь</h2>
+                        <div class="text-muted small">Серые часы заняты заявками или подтвержденными бронями.</div>
+                    </div>
+                    <form th:action="@{/rooms/{id}(id=${room.id})}" method="get" class="d-flex gap-2 align-items-end">
+                        <div>
+                            <label for="bookingDateView" class="form-label small">День</label>
+                            <input id="bookingDateView" type="date" name="bookingDate" class="form-control"
+                                   th:value="${selectedDate}">
+                        </div>
+                        <button type="submit" class="btn btn-outline-primary">Показать</button>
+                    </form>
+                </div>
+
+                <div class="row row-cols-4 row-cols-md-6 row-cols-xl-8 g-2 mb-4">
+                    <div th:each="slot : ${hourSlots}" class="col">
+                        <div class="text-center border rounded py-2"
+                             th:classappend="${slot.available} ? ' bg-success-subtle border-success' : ' bg-light text-muted'">
+                            <div class="fw-semibold" th:text="${slot.label}">00:00</div>
+                            <div class="small" th:text="${slot.available} ? 'Свободно' : 'Занято'">Свободно</div>
+                        </div>
+                    </div>
+                </div>
+
+                <form th:action="@{/rooms/{id}/bookings(id=${room.id})}"
+                      th:object="${bookingForm}"
+                      method="post"
+                      class="border rounded p-3">
+                    <div th:if="${#fields.hasGlobalErrors()}" class="alert alert-danger">
+                        <div th:each="err : ${#fields.globalErrors()}" th:text="${err}">Ошибка</div>
+                    </div>
+
+                    <input type="hidden" th:field="*{bookingDate}">
+
+                    <div class="row g-3">
+                        <div class="col-md-3">
+                            <label for="startHour" class="form-label">Начало</label>
+                            <select id="startHour" class="form-select" th:field="*{startHour}">
+                                <option value="">Выберите</option>
+                                <option th:each="slot : ${hourSlots}"
+                                        th:value="${slot.hour}"
+                                        th:text="${slot.label}"
+                                        th:disabled="${!slot.available}">00:00</option>
+                            </select>
+                            <div class="text-danger small" th:if="${#fields.hasErrors('startHour')}" th:errors="*{startHour}"></div>
+                        </div>
+
+                        <div class="col-md-3">
+                            <label for="finishHour" class="form-label">Конец</label>
+                            <select id="finishHour" class="form-select" th:field="*{finishHour}">
+                                <option value="">Выберите</option>
+                                <option th:each="hour : ${#numbers.sequence(1, 24)}"
+                                        th:value="${hour}"
+                                        th:text="${hour == 24 ? '24:00' : #numbers.formatInteger(hour, 2) + ':00'}">01:00</option>
+                            </select>
+                            <div class="text-danger small" th:if="${#fields.hasErrors('finishHour')}" th:errors="*{finishHour}"></div>
+                        </div>
+
+                        <div class="col-md-3">
+                            <label for="numOfPeople" class="form-label">Людей</label>
+                            <input id="numOfPeople" type="number" min="1" th:max="${room.peopleCapacity}"
+                                   class="form-control" th:field="*{numOfPeople}">
+                            <div class="text-danger small" th:if="${#fields.hasErrors('numOfPeople')}" th:errors="*{numOfPeople}"></div>
+                        </div>
+                    </div>
+
+                    <div class="mt-3">
+                        <label for="comment" class="form-label">Комментарий</label>
+                        <textarea id="comment" class="form-control" rows="3" maxlength="1000" th:field="*{comment}"></textarea>
+                        <div class="text-danger small" th:if="${#fields.hasErrors('comment')}" th:errors="*{comment}"></div>
+                    </div>
+
+                    <button type="submit" class="btn btn-primary mt-3">Отправить заявку</button>
+                </form>
+            </section>
+        </section>
+
+        <aside class="col-lg-4">
+            <div class="border rounded p-3">
+                <h2 class="h5 mb-3">Контакты организации</h2>
+
+                <div class="mb-2">
+                    <div class="text-muted small">Email</div>
+                    <div th:text="${room.organizationContactEmail ?: 'Не указан'}">Email</div>
+                </div>
+
+                <div>
+                    <div class="text-muted small">Телефон</div>
+                    <div th:text="${room.organizationContactPhone ?: 'Не указан'}">Телефон</div>
+                </div>
+            </div>
+
+            <div class="border rounded p-3 mt-3">
+                <h2 class="h5 mb-3">Похожие комнаты</h2>
+                <div th:if="${#lists.isEmpty(similarRooms)}" class="text-muted small">Похожих комнат пока нет.</div>
+
+                <div th:each="similar : ${similarRooms}" class="border-bottom pb-2 mb-2">
+                    <a th:href="@{/rooms/{id}(id=${similar.id})}"
+                       th:text="${similar.name}"
+                       class="fw-semibold text-decoration-none">Комната</a>
+                    <div class="small text-muted" th:text="${similar.organizationName}">Организация</div>
+                    <div class="small">
+                        <span th:text="${similar.peopleCapacity}">0</span>
+                        <span> мест · </span>
+                        <span th:text="${similar.pricePerHour}">0.00</span>
+                        <span> ₽/час</span>
+                    </div>
+                </div>
+            </div>
+
+            <div class="d-grid gap-2 mt-3">
+                <a th:href="@{/rooms}" class="btn btn-outline-secondary">Назад в каталог</a>
+                <a th:href="@{/organizations/{id}(id=${room.organizationId})}" class="btn btn-outline-primary">Страница организации</a>
+            </div>
+        </aside>
+    </div>
+</main>
+</body>
+</html>

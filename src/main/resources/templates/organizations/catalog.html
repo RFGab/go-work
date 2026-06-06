@@ -1,0 +1,64 @@
+<!DOCTYPE html>
+<html lang="ru" xmlns:th="http://www.thymeleaf.org"
+      th:replace="~{fragments/base :: html(title=~{::title}, content=~{::main})}">
+<head>
+    <title>GoWork - Каталог организаций</title>
+</head>
+<body>
+<main>
+    <div class="d-flex justify-content-between align-items-start gap-3 mb-4">
+        <div>
+            <h1 class="h3 mb-2">Каталог организаций</h1>
+            <div class="text-muted">Выберите город и найдите подходящее место для работы.</div>
+        </div>
+        <a th:href="@{/organizations/new}" class="btn btn-outline-primary">Создать организацию</a>
+    </div>
+
+    <form th:action="@{/organizations}" method="get" class="row g-2 align-items-end mb-4">
+        <div class="col-md-5">
+            <label for="cityId" class="form-label">Город</label>
+            <select id="cityId" name="cityId" class="form-select">
+                <option value="">Все города</option>
+                <option th:each="city : ${cities}"
+                        th:value="${city.id()}"
+                        th:text="${city.name()}"
+                        th:selected="${city.id() == selectedCityId}">Город</option>
+            </select>
+        </div>
+        <div class="col-auto">
+            <button type="submit" class="btn btn-primary">Показать</button>
+        </div>
+        <div class="col-auto">
+            <a th:href="@{/organizations}" class="btn btn-outline-secondary">Сбросить</a>
+        </div>
+    </form>
+
+    <div th:if="${#lists.isEmpty(organizations)}" class="alert alert-light border">
+        Организаций по выбранному городу пока нет.
+    </div>
+
+    <div class="row g-3">
+        <div th:each="organization : ${organizations}" class="col-md-6 col-xl-4">
+            <article class="border rounded p-3 h-100">
+                <div class="d-flex justify-content-between gap-3 mb-2">
+                    <h2 class="h5 mb-0">
+                        <a class="text-decoration-none"
+                           th:href="@{/organizations/{id}(id=${organization.id()})}"
+                           th:text="${organization.name()}">Организация</a>
+                    </h2>
+                    <span class="badge text-bg-light" th:text="${organization.roomCount()} + ' комнат'">0 комнат</span>
+                </div>
+
+                <div class="text-muted small mb-3" th:text="${organization.cityName()}">Город</div>
+                <p class="mb-3" th:text="${organization.description() ?: 'Описание пока не добавлено'}">Описание</p>
+
+                <div class="small text-muted">
+                    <div th:if="${organization.contactEmail()}" th:text="'Email: ' + ${organization.contactEmail()}">Email</div>
+                    <div th:if="${organization.contactPhone()}" th:text="'Телефон: ' + ${organization.contactPhone()}">Телефон</div>
+                </div>
+            </article>
+        </div>
+    </div>
+</main>
+</body>
+</html>

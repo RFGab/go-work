@@ -1,6 +1,5 @@
 package ru.itis.raslgab.gowork.security;
 
-import lombok.AllArgsConstructor;
 import lombok.Getter;
 import lombok.RequiredArgsConstructor;
 import org.springframework.security.core.GrantedAuthority;

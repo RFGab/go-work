@@ -1,0 +1,48 @@
+<!DOCTYPE html>
+<html lang="ru" xmlns:th="http://www.thymeleaf.org"
+      th:replace="~{fragments/base :: html(title=~{::title}, content=~{::main})}">
+<head>
+    <title th:text="'GoWork - ' + ${decision.actionTitle}">GoWork - Решение по брони</title>
+</head>
+<body>
+<main>
+    <section class="row justify-content-center">
+        <div class="col-lg-7">
+            <h1 class="h3 mb-3" th:text="${decision.actionTitle}">Решение по брони</h1>
+
+            <div class="border rounded p-3 mb-4">
+                <div><strong>Комната:</strong> <span th:text="${decision.roomName}">Комната</span></div>
+                <div><strong>Организация:</strong> <span th:text="${decision.organizationName}">Организация</span></div>
+                <div><strong>Арендатор:</strong> <span th:text="${decision.renterFullName}">Имя</span></div>
+                <div>
+                    <strong>Время:</strong>
+                    <span th:text="${#temporals.format(decision.timeStart, 'dd.MM.yyyy HH:mm')}">start</span>
+                    <span> - </span>
+                    <span th:text="${#temporals.format(decision.timeFinish, 'dd.MM.yyyy HH:mm')}">finish</span>
+                </div>
+            </div>
+
+            <form th:action="@{/bookings/{id}/decision(id=${decision.bookingId},action=${decision.action})}"
+                  th:object="${approvalForm}"
+                  method="post"
+                  class="vstack gap-3">
+                <div th:if="${#fields.hasGlobalErrors()}" class="alert alert-danger">
+                    <div th:each="err : ${#fields.globalErrors()}" th:text="${err}">Ошибка</div>
+                </div>
+
+                <div>
+                    <label for="code" class="form-label">Код из письма</label>
+                    <input id="code" type="text" inputmode="numeric" class="form-control" th:field="*{code}" maxlength="4">
+                    <div class="text-danger small" th:if="${#fields.hasErrors('code')}" th:errors="*{code}"></div>
+                </div>
+
+                <button type="submit"
+                        class="btn"
+                        th:classappend="${decision.action == 'approve'} ? ' btn-success' : ' btn-danger'"
+                        th:text="${decision.action == 'approve'} ? 'Одобрить бронь' : 'Отклонить бронь'">Подтвердить</button>
+            </form>
+        </div>
+    </section>
+</main>
+</body>
+</html>

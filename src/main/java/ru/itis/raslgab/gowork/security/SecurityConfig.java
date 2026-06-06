@@ -28,6 +28,7 @@ public class SecurityConfig {
                 // настройка доступов
                 .authorizeHttpRequests(auth -> auth
                         .requestMatchers("/", "/auth/**", "/css/**", "/js/**", "/images/**", "/static/**").permitAll()
+                        .requestMatchers("/bookings/*/decision").permitAll()
                         .requestMatchers("/admin/**").hasRole("ADMIN")  // Будем использовать позже
                         .anyRequest().authenticated()
                 )

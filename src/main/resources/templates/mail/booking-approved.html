@@ -1,0 +1,26 @@
+<!DOCTYPE html>
+<html lang="ru" xmlns:th="http://www.thymeleaf.org">
+<head>
+    <meta charset="UTF-8">
+    <title>Бронь подтверждена</title>
+</head>
+<body style="font-family: Arial, sans-serif; line-height: 1.5;">
+<h2>Бронь подтверждена</h2>
+<p>
+    Отлично, <strong th:text="${booking.renterFullName}">гость</strong>! Вашу заявку на комнату
+    <strong th:text="${booking.roomName}">Комната</strong> одобрили.
+</p>
+<p>
+    Время: <strong th:text="${#temporals.format(booking.timeStart, 'dd.MM.yyyy HH:mm')}">начало</strong>
+    -
+    <strong th:text="${#temporals.format(booking.timeFinish, 'dd.MM.yyyy HH:mm')}">конец</strong>
+</p>
+<div th:if="${hasQr}">
+    <p>Ваш QR-код для визита:</p>
+    <p><img src="cid:bookingQr" alt="QR code" style="width:240px;height:240px;"></p>
+</div>
+<p th:unless="${hasQr}">
+    QR-код не удалось приложить автоматически, но бронь уже подтверждена. Возьмите с собой документ и назовите комнату на стойке.
+</p>
+</body>
+</html>

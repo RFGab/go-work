@@ -1,4 +1,3 @@
-2026-06-01 08:35:43.753 INFO  [http-nio-8080-exec-5] USER_ACTIONS - userId=1 action=PROFILE_OPEN details=Profile page opened
-2026-06-01 08:35:53.002 INFO  [http-nio-8080-exec-7] USER_ACTIONS - userId=1 action=PROFILE_UPDATE_SUCCESS details=Profile updated
-2026-06-01 08:35:53.026 INFO  [http-nio-8080-exec-8] USER_ACTIONS - userId=1 action=PROFILE_OPEN details=Profile page opened
-2026-06-01 08:36:07.009 INFO  [http-nio-8080-exec-3] USER_ACTIONS - userId=1 action=PROFILE_OPEN details=Profile page opened
+2026-06-06 09:32:51.110 INFO  [http-nio-8080-exec-10] USER_ACTIONS - userId=1 action=ROOM_CATALOG_OPEN details=cityId=null, availableToday=false, minCapacity=null, page=0, size=9
+2026-06-06 09:32:53.596 INFO  [http-nio-8080-exec-2] USER_ACTIONS - userId=1 action=ROOM_OPEN details=roomId=1
+2026-06-06 09:33:11.117 INFO  [http-nio-8080-exec-4] USER_ACTIONS - userId=1 action=BOOKING_CREATE_FAILED details=roomId=1, Время окончания должно быть позже времени начала

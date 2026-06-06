@@ -1,0 +1,30 @@
+<!DOCTYPE html>
+<html lang="ru" xmlns:th="http://www.thymeleaf.org">
+<head>
+    <meta charset="UTF-8">
+    <title>Новая заявка на бронь</title>
+</head>
+<body style="font-family: Arial, sans-serif; line-height: 1.5;">
+<h2>Новая заявка на бронь</h2>
+<p>
+    Пользователь <strong th:text="${booking.renterFullName}">Иван Иванов</strong>
+    хочет забронировать комнату <strong th:text="${booking.roomName}">Комната</strong>
+    в организации <strong th:text="${booking.organizationName}">Организация</strong>.
+</p>
+<ul>
+    <li>Email: <span th:text="${booking.renterEmail}">email@example.com</span></li>
+    <li>Телефон: <span th:text="${booking.renterPhone}">+7</span></li>
+    <li>С: <span th:text="${#temporals.format(booking.timeStart, 'dd.MM.yyyy HH:mm')}">01.01.2026 10:00</span></li>
+    <li>До: <span th:text="${#temporals.format(booking.timeFinish, 'dd.MM.yyyy HH:mm')}">01.01.2026 12:00</span></li>
+    <li>Людей: <span th:text="${booking.numOfPeople}">1</span></li>
+    <li>Комментарий: <span th:text="${booking.comment ?: 'Без комментария'}">Комментарий</span></li>
+</ul>
+<p>Код подтверждения действия: <strong th:text="${booking.approvalCode}">1234</strong></p>
+<p>
+    <a th:href="${booking.approveUrl}"
+       style="display:inline-block;padding:10px 16px;background:#198754;color:white;text-decoration:none;border-radius:6px;">Одобрить</a>
+    <a th:href="${booking.rejectUrl}"
+       style="display:inline-block;padding:10px 16px;background:#dc3545;color:white;text-decoration:none;border-radius:6px;margin-left:8px;">Отклонить</a>
+</p>
+</body>
+</html>

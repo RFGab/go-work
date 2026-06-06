@@ -1,0 +1,17 @@
+<!DOCTYPE html>
+<html lang="ru" xmlns:th="http://www.thymeleaf.org">
+<head>
+    <meta charset="UTF-8">
+    <title>Заявка отклонена</title>
+</head>
+<body style="font-family: Arial, sans-serif; line-height: 1.5;">
+<h2>По заявке пришел ответ</h2>
+<p>
+    <strong th:text="${booking.renterFullName}">Гость</strong>, владелец пока не смог подтвердить бронь комнаты
+    <strong th:text="${booking.roomName}">Комната</strong>.
+</p>
+<p>
+    Это не тупик, а просто занятая дверь: попробуйте выбрать другое время или похожую комнату в каталоге.
+</p>
+</body>
+</html>

@@ -22,4 +22,8 @@ public final class CodeGenerator {
     public static String generate6Char() {
         return generate(6);
     }
+
+    public static String generate4Digit() {
+        return String.format("%04d", SECURE_RANDOM.nextInt(10_000));
+    }
 }
