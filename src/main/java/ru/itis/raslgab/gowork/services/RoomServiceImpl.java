@@ -55,7 +55,7 @@ public class RoomServiceImpl implements RoomService {
     @Transactional(readOnly = true)
     public RoomDetailsDto getRoomDetails(Long roomId) {
         RoomDetailsDto room = roomRepo.findDetailsById(roomId)
-                .orElseThrow(() -> new IllegalArgumentException("Room not found"));
+                .orElseThrow(() -> new IllegalArgumentException("Комната не найдена"));
 
         LocalDateTime dayStart = LocalDate.now().atStartOfDay();
         LocalDateTime dayEnd = dayStart.plusDays(1);
@@ -72,7 +72,7 @@ public class RoomServiceImpl implements RoomService {
     @Transactional(readOnly = true)
     public List<BookingHourSlotDto> getHourSlots(Long roomId, LocalDate bookingDate) {
         RoomDetailsDto room = roomRepo.findDetailsById(roomId)
-                .orElseThrow(() -> new IllegalArgumentException("Room not found"));
+                .orElseThrow(() -> new IllegalArgumentException("Комната не найдена"));
         LocalDate selectedDate = bookingDate == null ? LocalDate.now() : bookingDate;
         LocalDateTime dayStart = selectedDate.atStartOfDay();
         LocalDateTime dayEnd = dayStart.plusDays(1);
@@ -114,7 +114,7 @@ public class RoomServiceImpl implements RoomService {
     @Transactional(readOnly = true)
     public List<SimilarRoomDto> getSimilarRooms(Long roomId) {
         RoomDetailsDto room = roomRepo.findDetailsById(roomId)
-                .orElseThrow(() -> new IllegalArgumentException("Room not found"));
+                .orElseThrow(() -> new IllegalArgumentException("Комната не найдена"));
         if (room.getCityId() == null) {
             return List.of();
         }
@@ -128,10 +128,10 @@ public class RoomServiceImpl implements RoomService {
     @Transactional
     public Long createRoom(Long organizationId, Long ownerId, RoomCreateForm form) {
         Organization organization = organizationRepo.findDetailsById(organizationId)
-                .orElseThrow(() -> new IllegalArgumentException("Organization not found"));
+                .orElseThrow(() -> new IllegalArgumentException("Организация не найдена"));
 
         if (organization.getOwner() == null || !organization.getOwner().getId().equals(ownerId)) {
-            throw new AccessDeniedException("Only organization owner can create rooms");
+            throw new AccessDeniedException("Создавать комнаты может только владелец организации");
         }
 
         Room room = Room.builder()

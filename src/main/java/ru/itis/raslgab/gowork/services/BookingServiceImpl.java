@@ -33,9 +33,9 @@ public class BookingServiceImpl implements BookingService {
     @Transactional
     public Long createBookingRequest(Long roomId, Long renterId, BookingCreateForm form) {
         Room room = roomRepo.findById(roomId)
-                .orElseThrow(() -> new IllegalArgumentException("Room not found"));
+                .orElseThrow(() -> new IllegalArgumentException("Комната не найдена"));
         User renter = userRepo.findById(renterId)
-                .orElseThrow(() -> new IllegalStateException("Current user not found"));
+                .orElseThrow(() -> new IllegalStateException("Текущий пользователь не найден"));
 
         validateRequest(room, form);
 

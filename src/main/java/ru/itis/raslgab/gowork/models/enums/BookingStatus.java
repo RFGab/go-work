@@ -6,5 +6,5 @@ public enum BookingStatus {
     CONFIRMED, // бронь подтверждена
     CANCELLED, // отменена
     REJECTED,
-    COMPLETED, //
+    COMPLETED,
 }

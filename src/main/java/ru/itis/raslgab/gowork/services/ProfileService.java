@@ -1,5 +1,6 @@
 package ru.itis.raslgab.gowork.services;
 
+import org.springframework.web.multipart.MultipartFile;
 import ru.itis.raslgab.gowork.dto.OrganizationProfileItemDto;
 import ru.itis.raslgab.gowork.forms.UserProfileForm;
 
@@ -13,4 +14,6 @@ public interface ProfileService {
     boolean isEmailTakenByAnotherUser(String email, Long userId);
 
     void updateProfile(Long userId, UserProfileForm form);
+
+    void updateAvatar(Long userId, MultipartFile avatar);
 }

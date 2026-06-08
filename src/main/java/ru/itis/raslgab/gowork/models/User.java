@@ -41,6 +41,9 @@ public class User {
     @Column(nullable = false)
     private String phone;
 
+    @Column(name = "avatar_file_name")
+    private String avatarFileName;
+
     @Column(nullable = false)
     @Builder.Default
     private boolean isBlocked = false;

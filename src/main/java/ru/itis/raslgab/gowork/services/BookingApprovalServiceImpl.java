@@ -89,7 +89,7 @@ public class BookingApprovalServiceImpl implements BookingApprovalService {
 
     private Booking findBooking(Long bookingId) {
         return bookingRepo.findDetailsById(bookingId)
-                .orElseThrow(() -> new IllegalArgumentException("Booking not found"));
+                .orElseThrow(() -> new IllegalArgumentException("Заявка на бронь не найдена"));
     }
 
     private BookingMailDto toMailDto(Booking booking) {
@@ -100,7 +100,7 @@ public class BookingApprovalServiceImpl implements BookingApprovalService {
                 .renterFullName(fullName(renter))
                 .renterEmail(renter.getEmail())
                 .renterPhone(renter.getPhone())
-                .renterProfilePhoto("не указано")
+                .renterProfilePhoto(renter.getAvatarFileName() == null ? "не указано" : renter.getAvatarFileName())
                 .ownerEmail(owner.getEmail())
                 .roomName(booking.getRoom().getName())
                 .organizationName(booking.getRoom().getOrganization().getName())
@@ -134,7 +134,7 @@ public class BookingApprovalServiceImpl implements BookingApprovalService {
         if ("reject".equalsIgnoreCase(action)) {
             return "reject";
         }
-        throw new IllegalArgumentException("Unknown booking action");
+        throw new IllegalArgumentException("Неизвестное действие с бронью");
     }
 
     private byte[] generateQrSafely(BookingMailDto dto) {

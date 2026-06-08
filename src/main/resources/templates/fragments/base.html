@@ -20,26 +20,26 @@
             <a th:href="@{/}" class="text-decoration-none text-dark fw-bold fs-4">GoWork</a>
 
             <nav class="d-flex align-items-center gap-3">
-                <a th:href="@{/rooms}" class="text-decoration-none text-secondary">Rooms</a>
-                <a th:href="@{/organizations}" class="text-decoration-none text-secondary">Organizations</a>
+                <a th:href="@{/rooms}" class="text-decoration-none text-secondary">Комнаты</a>
+                <a th:href="@{/organizations}" class="text-decoration-none text-secondary">Организации</a>
                 <a th:if="${#authorization.expression('isAuthenticated()')}"
                    th:href="@{/bookings/my}"
-                   class="text-decoration-none text-secondary">My bookings</a>
+                   class="text-decoration-none text-secondary">Мои брони</a>
                 <a th:if="${#authorization.expression('isAuthenticated()')}"
                    th:href="@{/profile}"
-                   class="text-decoration-none text-secondary">Profile</a>
+                   class="text-decoration-none text-secondary">Профиль</a>
                 <form th:if="${#authorization.expression('isAuthenticated()')}"
                       th:action="@{/auth/logout}"
                       method="post"
                       class="m-0">
-                    <button type="submit" class="btn btn-link p-0 text-decoration-none text-secondary">Logout</button>
+                    <button type="submit" class="btn btn-link p-0 text-decoration-none text-secondary">Выйти</button>
                 </form>
                 <a th:if="${#authorization.expression('!isAuthenticated()')}"
                    th:href="@{/auth/login}"
-                   class="text-decoration-none text-secondary">Login</a>
+                   class="text-decoration-none text-secondary">Войти</a>
                 <a th:if="${#authorization.expression('!isAuthenticated()')}"
                    th:href="@{/auth/register}"
-                   class="btn btn-sm btn-primary text-white">Registration</a>
+                   class="btn btn-sm btn-primary text-white">Регистрация</a>
             </nav>
         </div>
     </div>
@@ -51,7 +51,7 @@
 
 <footer class="border-top mt-5 py-4 text-center text-muted small">
     <div class="container">
-        <p class="mb-0">2026 GoWork. Study project.</p>
+        <p class="mb-0">2026 GoWork. Учебный проект.</p>
     </div>
 </footer>
 </body>

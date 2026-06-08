@@ -14,13 +14,13 @@ public class QrCodeServiceImpl implements QrCodeService {
     @Override
     public byte[] generateBookingQr(BookingMailDto booking) {
         String qrData = """
-                GoWork booking
-                Renter: %s
-                Profile photo: %s
-                Room: %s
-                Organization: %s
-                From: %s
-                To: %s
+                Бронь GoWork
+                Арендатор: %s
+                Фото профиля: %s
+                Комната: %s
+                Организация: %s
+                С: %s
+                До: %s
                 """.formatted(
                 booking.getRenterFullName(),
                 booking.getRenterProfilePhoto(),
@@ -32,7 +32,7 @@ public class QrCodeServiceImpl implements QrCodeService {
 
         String url = UriComponentsBuilder
                 .fromUriString("https://api.qrserver.com/v1/create-qr-code/")
-                .queryParam("size", "240x240")
+                .queryParam("size", "300x300")
                 .queryParam("data", qrData)
                 .build()
                 .encode()

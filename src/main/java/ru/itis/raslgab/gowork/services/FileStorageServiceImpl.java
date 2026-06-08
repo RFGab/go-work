@@ -12,6 +12,7 @@ import ru.itis.raslgab.gowork.repositories.FileInfoRepo;
 
 import java.io.FileInputStream;
 import java.io.IOException;
+import java.nio.file.Path;
 import java.nio.file.Files;
 import java.nio.file.Paths;
 import java.util.UUID;
@@ -29,19 +30,18 @@ public class FileStorageServiceImpl implements FileStorageService {
     @Override
     public String saveFile(MultipartFile uploadFile) {
         String storageName = UUID.randomUUID() + "_" + uploadFile.getOriginalFilename();
-        // + "." + FilenameUtils.getExtention(uploadFile.getOriginalFilename());
-
+        Path storageFilePath = Paths.get(storagePath, storageName);
         FileInfo file = FileInfo.builder()
                 .type(uploadFile.getContentType())
                 .originalFileName(uploadFile.getOriginalFilename())
                 .size(uploadFile.getSize())
                 .storageFileName(storageName)
-                .url(storagePath + "\\" + storageName)
+                .url(storageFilePath.toString())
                 .build();
 
         try {
-//            Files.copy(uploadFile.getInputStream(), Path.of(storagePath, storageName));
-            Files.copy(uploadFile.getInputStream(), Paths.get(storagePath, storageName));
+            Files.createDirectories(storageFilePath.getParent());
+            Files.copy(uploadFile.getInputStream(), storageFilePath);
         } catch (IOException e) {
             throw new IllegalStateException(e);
         }

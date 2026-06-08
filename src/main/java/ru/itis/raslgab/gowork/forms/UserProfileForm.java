@@ -26,4 +26,6 @@ public class UserProfileForm {
 
     @NotBlank(message = "Телефон обязателен")
     private String phone;
+
+    private String avatarFileName;
 }

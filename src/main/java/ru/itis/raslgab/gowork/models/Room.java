@@ -10,7 +10,7 @@ import java.math.BigDecimal;
 import java.time.LocalDateTime;
 import java.util.Set;
 
-// Комната (переговорка или х его знает что еще)
+// Комната
 @Entity
 @Table(name = "rooms", indexes = {
         @Index(name = "idx_room_org_status", columnList = "organization_id, status"),
@@ -64,7 +64,7 @@ public class Room {
             joinColumns = @JoinColumn(name = "room_id", nullable = false),
             inverseJoinColumns = @JoinColumn(name = "option_id", nullable = false)
     )
-    private Set<Option> options; // теги: projector, whiteboard, coffee и прочее что может быть в комнате
+    private Set<Option> options; // опции комнаты: проектор, доска, кофе и прочее
 
     @Column(nullable = false)
     @UpdateTimestamp

@@ -2,13 +2,13 @@
 <html lang="ru" xmlns:th="http://www.thymeleaf.org"
       th:replace="~{fragments/base :: html(title=~{::title}, content=~{::main})}">
 <head>
-    <title>GoWork - Registration</title>
+    <title>GoWork - Регистрация</title>
 </head>
 <body>
 <main>
     <section class="row justify-content-center">
         <div class="col-md-8 col-lg-6">
-            <h1 class="h3 mb-4 text-center">Registration</h1>
+            <h1 class="h3 mb-4 text-center">Регистрация</h1>
 
             <div th:if="${globalError}" class="alert alert-danger" th:text="${globalError}"></div>
 
@@ -17,50 +17,50 @@
                     <label for="email" class="form-label">Email</label>
                     <div class="input-group">
                         <input id="email" type="email" class="form-control" th:field="*{email}" required>
-                        <button id="sendCodeBtn" type="button" class="btn btn-outline-secondary">Send code</button>
+                        <button id="sendCodeBtn" type="button" class="btn btn-outline-secondary">Отправить код</button>
                     </div>
                     <div class="text-danger small" th:if="${#fields.hasErrors('email')}" th:errors="*{email}"></div>
                     <div id="codeStatus" class="form-text"></div>
                 </div>
 
                 <div>
-                    <label for="emailConfirmationCode" class="form-label">Email code</label>
+                    <label for="emailConfirmationCode" class="form-label">Код из письма</label>
                     <input id="emailConfirmationCode" type="text" class="form-control" th:field="*{emailConfirmationCode}" maxlength="6" required>
                     <div class="text-danger small" th:if="${#fields.hasErrors('emailConfirmationCode')}" th:errors="*{emailConfirmationCode}"></div>
                 </div>
 
                 <div class="row g-3">
                     <div class="col-md-6">
-                        <label for="firstName" class="form-label">First name</label>
+                        <label for="firstName" class="form-label">Имя</label>
                         <input id="firstName" type="text" class="form-control" th:field="*{firstName}" required>
                         <div class="text-danger small" th:if="${#fields.hasErrors('firstName')}" th:errors="*{firstName}"></div>
                     </div>
                     <div class="col-md-6">
-                        <label for="lastName" class="form-label">Last name</label>
+                        <label for="lastName" class="form-label">Фамилия</label>
                         <input id="lastName" type="text" class="form-control" th:field="*{lastName}" required>
                         <div class="text-danger small" th:if="${#fields.hasErrors('lastName')}" th:errors="*{lastName}"></div>
                     </div>
                 </div>
 
                 <div>
-                    <label for="phone" class="form-label">Phone</label>
+                    <label for="phone" class="form-label">Телефон</label>
                     <input id="phone" type="tel" class="form-control" th:field="*{phone}" required>
                     <div class="text-danger small" th:if="${#fields.hasErrors('phone')}" th:errors="*{phone}"></div>
                 </div>
 
                 <div>
-                    <label for="password" class="form-label">Password</label>
+                    <label for="password" class="form-label">Пароль</label>
                     <input id="password" type="password" class="form-control" th:field="*{password}" required>
                     <div class="text-danger small" th:if="${#fields.hasErrors('password')}" th:errors="*{password}"></div>
                 </div>
 
                 <div>
-                    <label for="confirmPassword" class="form-label">Repeat password</label>
+                    <label for="confirmPassword" class="form-label">Повторите пароль</label>
                     <input id="confirmPassword" type="password" class="form-control" th:field="*{confirmPassword}" required>
                     <div class="text-danger small" th:if="${#fields.hasErrors('confirmPassword')}" th:errors="*{confirmPassword}"></div>
                 </div>
 
-                <button type="submit" class="btn btn-primary w-100">Create account</button>
+                <button type="submit" class="btn btn-primary w-100">Создать аккаунт</button>
             </form>
         </div>
     </section>
@@ -74,13 +74,13 @@
         button?.addEventListener('click', async () => {
             const email = document.getElementById('email').value.trim();
             if (!email) {
-                status.textContent = 'Enter email first.';
+                status.textContent = 'Сначала введите email.';
                 status.className = 'form-text text-danger';
                 return;
             }
 
             button.disabled = true;
-            status.textContent = 'Sending...';
+            status.textContent = 'Отправляем...';
             status.className = 'form-text';
 
             try {
@@ -95,10 +95,10 @@
                     credentials: 'same-origin'
                 });
 
-                status.textContent = response.ok ? 'Code sent.' : 'Could not send code.';
+                status.textContent = response.ok ? 'Код отправлен.' : 'Не удалось отправить код.';
                 status.className = response.ok ? 'form-text text-success' : 'form-text text-danger';
             } catch (error) {
-                status.textContent = 'Network error.';
+                status.textContent = 'Ошибка сети.';
                 status.className = 'form-text text-danger';
             } finally {
                 button.disabled = false;

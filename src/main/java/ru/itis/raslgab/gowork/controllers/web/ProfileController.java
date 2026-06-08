@@ -10,6 +10,8 @@ import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.ModelAttribute;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestMapping;
+import org.springframework.web.bind.annotation.RequestParam;
+import org.springframework.web.multipart.MultipartFile;
 import org.springframework.web.servlet.mvc.support.RedirectAttributes;
 import ru.itis.raslgab.gowork.forms.UserProfileForm;
 import ru.itis.raslgab.gowork.security.UserDetailsImpl;
@@ -54,6 +56,22 @@ public class ProfileController {
         profileService.updateProfile(userId, form);
         userActionLogService.log(userId, "PROFILE_UPDATE_SUCCESS", "Profile updated");
         redirectAttributes.addFlashAttribute("successMessage", "Профиль обновлен");
+        return "redirect:/profile";
+    }
+
+    @PostMapping("/avatar")
+    public String updateAvatar(@AuthenticationPrincipal UserDetailsImpl userDetails,
+                               @RequestParam("avatar") MultipartFile avatar,
+                               RedirectAttributes redirectAttributes) {
+        Long userId = userDetails.getUserId();
+        try {
+            profileService.updateAvatar(userId, avatar);
+            userActionLogService.log(userId, "PROFILE_AVATAR_UPDATE_SUCCESS", "Profile avatar updated");
+            redirectAttributes.addFlashAttribute("successMessage", "Аватарка обновлена");
+        } catch (IllegalArgumentException e) {
+            userActionLogService.log(userId, "PROFILE_AVATAR_UPDATE_FAILED", e.getMessage());
+            redirectAttributes.addFlashAttribute("avatarError", e.getMessage());
+        }
         return "redirect:/profile";
     }
 

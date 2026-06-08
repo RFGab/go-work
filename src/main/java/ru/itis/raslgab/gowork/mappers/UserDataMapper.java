@@ -28,6 +28,13 @@ public class UserDataMapper {
     }
 
     public UserProfileDto mapToUserProfileDto(User user) {
-        return UserProfileDto.builder().build();
+        return UserProfileDto.builder()
+                .id(user.getId())
+                .firstName(user.getFirstName())
+                .lastName(user.getLastName())
+                .email(user.getEmail())
+                .phone(user.getPhone())
+                .avatarFileName(user.getAvatarFileName())
+                .build();
     }
 }

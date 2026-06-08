@@ -2,22 +2,22 @@
 <html lang="ru" xmlns:th="http://www.thymeleaf.org"
       th:replace="~{fragments/base :: html(title=~{::title}, content=~{::main})}">
 <head>
-    <title>GoWork - Login</title>
+    <title>GoWork - Вход</title>
 </head>
 <body>
 <main>
     <section class="row justify-content-center">
         <div class="col-md-6 col-lg-4">
-            <h1 class="h3 mb-4 text-center">Login</h1>
+            <h1 class="h3 mb-4 text-center">Вход</h1>
 
             <div th:if="${param.error}" class="alert alert-danger">
-                Invalid email or password.
+                Неверный email или пароль.
             </div>
             <div th:if="${param.logout}" class="alert alert-success">
-                You have been logged out.
+                Вы вышли из аккаунта.
             </div>
             <div th:if="${param.registered}" class="alert alert-success">
-                Account created. You can sign in now.
+                Аккаунт создан. Теперь можно войти.
             </div>
 
             <form th:action="@{/auth/login}" method="post" class="vstack gap-3">
@@ -27,15 +27,15 @@
                 </div>
 
                 <div>
-                    <label for="password" class="form-label">Password</label>
+                    <label for="password" class="form-label">Пароль</label>
                     <input id="password" name="password" type="password" class="form-control" autocomplete="current-password" required>
                 </div>
 
-                <button type="submit" class="btn btn-primary w-100">Sign in</button>
+                <button type="submit" class="btn btn-primary w-100">Войти</button>
             </form>
 
             <p class="text-center mt-3 mb-0">
-                <a th:href="@{/auth/register}">Create account</a>
+                <a th:href="@{/auth/register}">Создать аккаунт</a>
             </p>
         </div>
     </section>

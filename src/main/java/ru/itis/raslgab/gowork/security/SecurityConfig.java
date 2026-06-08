@@ -27,7 +27,7 @@ public class SecurityConfig {
 
                 // настройка доступов
                 .authorizeHttpRequests(auth -> auth
-                        .requestMatchers("/", "/auth/**", "/css/**", "/js/**", "/images/**", "/static/**").permitAll()
+                        .requestMatchers("/", "/auth/**", "/css/**", "/js/**", "/images/**", "/imgs/**", "/static/**").permitAll()
                         .requestMatchers("/bookings/*/decision").permitAll()
                         .requestMatchers("/admin/**").hasRole("ADMIN")  // Будем использовать позже
                         .anyRequest().authenticated()
@@ -52,8 +52,19 @@ public class SecurityConfig {
 
                 // Обработка ошибок доступа (403)
                 .exceptionHandling(ex -> ex
-                        .accessDeniedHandler((request, response, accessDeniedException) ->
-                                response.sendRedirect("/error/403"))
+                        .accessDeniedHandler((request, response, accessDeniedException) -> {
+                            if (request.getRequestURI().startsWith("/img")
+                                    || request.getRequestURI().startsWith("/auth/confirmMail")
+                                    || request.getRequestURI().startsWith("/api")) {
+                                response.setStatus(403);
+                                response.setContentType("application/json;charset=UTF-8");
+                                response.getWriter().write("""
+                                        {"status":403,"error":"Forbidden","message":"Доступ запрещен","path":"%s"}
+                                        """.formatted(request.getRequestURI()));
+                            } else {
+                                response.sendRedirect("/error/403");
+                            }
+                        })
                 )
 
                 .build();

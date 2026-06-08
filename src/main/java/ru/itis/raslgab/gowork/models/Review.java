@@ -6,7 +6,7 @@ import org.hibernate.annotations.CreationTimestamp;
 
 import java.time.LocalDateTime;
 
-// Отзыв (Review)
+// Отзыв
 @Entity
 @Table(name = "reviews", indexes = {
         @Index(name = "idx_review_org_rating", columnList = "organization_id, rating"),

@@ -47,7 +47,7 @@ public class OrganizationServiceImpl implements OrganizationService {
     @Transactional
     public Long createOrganization(Long ownerId, OrganizationCreateForm form) {
         User owner = userRepo.findById(ownerId)
-                .orElseThrow(() -> new IllegalStateException("Current user not found"));
+                .orElseThrow(() -> new IllegalStateException("Текущий пользователь не найден"));
         City city = getOrCreateCity(form.getCityName());
 
         Organization organization = Organization.builder()
@@ -148,18 +148,18 @@ public class OrganizationServiceImpl implements OrganizationService {
 
     private Organization findOrganization(Long organizationId) {
         return organizationRepo.findDetailsById(organizationId)
-                .orElseThrow(() -> new IllegalArgumentException("Organization not found"));
+                .orElseThrow(() -> new IllegalArgumentException("Организация не найдена"));
     }
 
     private void checkOwner(Organization organization, Long userId) {
         if (!isOwner(organization, userId)) {
-            throw new AccessDeniedException("Only organization owner can edit organization info");
+            throw new AccessDeniedException("Редактировать организацию может только владелец");
         }
     }
 
     private void checkManager(Organization organization, Long userId, RoleEnum role) {
         if (!isOwner(organization, userId) && role != RoleEnum.ADMIN) {
-            throw new AccessDeniedException("Only organization owner or admin can manage organization");
+            throw new AccessDeniedException("Управлять организацией может только владелец или администратор");
         }
     }
 
