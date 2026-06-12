@@ -1,5 +1,7 @@
 package ru.itis.raslgab.gowork.repositories;
 
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.Pageable;
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.data.jpa.repository.Query;
 import org.springframework.data.repository.query.Param;
@@ -9,6 +11,7 @@ import ru.itis.raslgab.gowork.dto.RoomOptionDto;
 import ru.itis.raslgab.gowork.dto.SimilarRoomDto;
 import ru.itis.raslgab.gowork.models.Room;
 import ru.itis.raslgab.gowork.models.enums.OrganizationStatus;
+import ru.itis.raslgab.gowork.models.enums.RoomStatus;
 
 import java.util.List;
 import java.util.Optional;
@@ -29,7 +32,7 @@ public interface RoomRepo extends JpaRepository<Room, Long> {
             """)
     List<RoomCatalogItemDto> findCatalogItemsByOrganizationId(@Param("organizationId") Long organizationId);
 
-    @Query("""
+    @Query(value = """
             select new ru.itis.raslgab.gowork.dto.RoomCatalogItemDto(
                 r.id,
                 r.name,
@@ -47,11 +50,24 @@ public interface RoomRepo extends JpaRepository<Room, Long> {
             where o.status = :organizationStatus
               and (:cityId is null or c.id = :cityId)
               and (:minCapacity is null or r.peopleCapacity >= :minCapacity)
-            order by r.name
+              and (:availableOnly = false or r.status = :availableStatus)
+            """,
+            countQuery = """
+            select count(r)
+            from Room r
+            join r.organization o
+            left join o.city c
+            where o.status = :organizationStatus
+              and (:cityId is null or c.id = :cityId)
+              and (:minCapacity is null or r.peopleCapacity >= :minCapacity)
+              and (:availableOnly = false or r.status = :availableStatus)
             """)
-    List<RoomCatalogItemDto> findRoomCatalogBaseItems(@Param("cityId") Long cityId,
+    Page<RoomCatalogItemDto> findRoomCatalogBaseItems(@Param("cityId") Long cityId,
                                                       @Param("minCapacity") Integer minCapacity,
-                                                      @Param("organizationStatus") OrganizationStatus organizationStatus);
+                                                      @Param("organizationStatus") OrganizationStatus organizationStatus,
+                                                      @Param("availableOnly") boolean availableOnly,
+                                                      @Param("availableStatus") RoomStatus availableStatus,
+                                                      Pageable pageable);
 
     @Query("""
             select new ru.itis.raslgab.gowork.dto.RoomDetailsDto(

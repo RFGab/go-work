@@ -1,0 +1,57 @@
+<!DOCTYPE html>
+<html lang="ru" xmlns:th="http://www.thymeleaf.org"
+      th:replace="~{fragments/base :: html(title=~{::title}, content=~{::main})}">
+<head>
+    <title>GoWork - Админка</title>
+</head>
+<body>
+<main>
+    <h1 class="h3 mb-4">Админка</h1>
+
+    <div class="row g-3">
+        <div class="col-md-4">
+            <a th:href="@{/admin/users}" class="d-block border rounded p-3 text-decoration-none">
+                <div class="fw-semibold">Пользователи</div>
+                <div class="text-muted" th:text="${counts.users}">0</div>
+            </a>
+        </div>
+        <div class="col-md-4">
+            <a th:href="@{/admin/organizations}" class="d-block border rounded p-3 text-decoration-none">
+                <div class="fw-semibold">Организации</div>
+                <div class="text-muted" th:text="${counts.organizations}">0</div>
+            </a>
+        </div>
+        <div class="col-md-4">
+            <a th:href="@{/admin/rooms}" class="d-block border rounded p-3 text-decoration-none">
+                <div class="fw-semibold">Комнаты</div>
+                <div class="text-muted" th:text="${counts.rooms}">0</div>
+            </a>
+        </div>
+        <div class="col-md-4">
+            <a th:href="@{/admin/bookings}" class="d-block border rounded p-3 text-decoration-none">
+                <div class="fw-semibold">Брони</div>
+                <div class="text-muted" th:text="${counts.bookings}">0</div>
+            </a>
+        </div>
+        <div class="col-md-4">
+            <a th:href="@{/admin/cities}" class="d-block border rounded p-3 text-decoration-none">
+                <div class="fw-semibold">Города</div>
+                <div class="text-muted" th:text="${counts.cities}">0</div>
+            </a>
+        </div>
+        <div class="col-md-4">
+            <a th:href="@{/admin/options}" class="d-block border rounded p-3 text-decoration-none">
+                <div class="fw-semibold">Опции</div>
+                <div class="text-muted" th:text="${counts.options}">0</div>
+            </a>
+        </div>
+        <div class="col-md-4">
+            <a th:href="@{/admin/reviews}" class="d-block border rounded p-3 text-decoration-none">
+                <div class="fw-semibold">Отзывы</div>
+                <div class="text-muted" th:text="${counts.reviews}">0</div>
+            </a>
+        </div>
+    </div>
+</main>
+</body>
+</html>

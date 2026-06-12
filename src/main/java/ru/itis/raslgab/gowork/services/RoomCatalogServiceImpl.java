@@ -5,6 +5,7 @@ import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageImpl;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
+import org.springframework.data.domain.Sort;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import ru.itis.raslgab.gowork.dto.BookingIntervalDto;
@@ -46,16 +47,24 @@ public class RoomCatalogServiceImpl implements RoomCatalogService {
     @Transactional(readOnly = true)
     public Page<RoomCatalogItemDto> getCatalog(RoomCatalogFilterForm filter) {
         RoomCatalogFilterForm safeFilter = filter == null ? new RoomCatalogFilterForm() : filter;
-        Pageable pageable = PageRequest.of(safeFilter.safePage(), safeFilter.safeSize());
-
-        List<RoomCatalogItemDto> rooms = roomRepo.findRoomCatalogBaseItems(
-                safeFilter.getCityId(),
-                safeFilter.getMinCapacity(),
-                OrganizationStatus.ACTIVE
+        Pageable pageable = PageRequest.of(
+                safeFilter.safePage(),
+                safeFilter.safeSize(),
+                Sort.by(Sort.Direction.ASC, "name")
         );
 
+        Page<RoomCatalogItemDto> roomsPage = roomRepo.findRoomCatalogBaseItems(
+                safeFilter.getCityId(),
+                safeFilter.getMinCapacity(),
+                OrganizationStatus.ACTIVE,
+                safeFilter.isAvailableTodaySelected(),
+                RoomStatus.AVAILABLE,
+                pageable
+        );
+        List<RoomCatalogItemDto> rooms = roomsPage.getContent();
+
         if (rooms.isEmpty()) {
-            return new PageImpl<>(List.of(), pageable, 0);
+            return roomsPage;
         }
 
         LocalDateTime dayStart = LocalDate.now().atStartOfDay();
@@ -73,15 +82,12 @@ public class RoomCatalogServiceImpl implements RoomCatalogService {
 
         List<RoomCatalogItemDto> enrichedRooms = rooms.stream()
                 .map(room -> room.withAvailableHoursToday(calculateAvailableHours(room, intervalsByRoom.get(room.id()), dayStart, dayEnd)))
-                .filter(room -> !safeFilter.isAvailableTodaySelected() || room.availableHoursToday().compareTo(BigDecimal.ZERO) > 0)
-                .sorted(Comparator.comparing(RoomCatalogItemDto::availableHoursToday).reversed()
-                        .thenComparing(RoomCatalogItemDto::name, String.CASE_INSENSITIVE_ORDER))
                 .toList();
 
         return new PageImpl<>(
-                slice(enrichedRooms, pageable),
+                enrichedRooms,
                 pageable,
-                enrichedRooms.size()
+                roomsPage.getTotalElements()
         );
     }
 
@@ -142,15 +148,6 @@ public class RoomCatalogServiceImpl implements RoomCatalogService {
 
     private LocalDateTime max(LocalDateTime first, LocalDateTime second) {
         return first.isAfter(second) ? first : second;
-    }
-
-    private List<RoomCatalogItemDto> slice(List<RoomCatalogItemDto> rooms, Pageable pageable) {
-        int start = (int) pageable.getOffset();
-        if (start >= rooms.size()) {
-            return List.of();
-        }
-        int end = Math.min(start + pageable.getPageSize(), rooms.size());
-        return rooms.subList(start, end);
     }
 
     private record TimeRange(LocalDateTime start, LocalDateTime end) {

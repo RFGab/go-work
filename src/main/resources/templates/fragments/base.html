@@ -28,6 +28,9 @@
                 <a th:if="${#authorization.expression('isAuthenticated()')}"
                    th:href="@{/profile}"
                    class="text-decoration-none text-secondary">Профиль</a>
+                <a th:if="${#authorization.expression('hasRole(''ADMIN'')')}"
+                   th:href="@{/admin}"
+                   class="text-decoration-none text-secondary">Админка</a>
                 <form th:if="${#authorization.expression('isAuthenticated()')}"
                       th:action="@{/auth/logout}"
                       method="post"
