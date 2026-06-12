@@ -3,6 +3,7 @@ package ru.itis.raslgab.gowork.services;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
+import ru.itis.raslgab.gowork.dto.BookingListItemDto;
 import ru.itis.raslgab.gowork.forms.BookingCreateForm;
 import ru.itis.raslgab.gowork.models.Booking;
 import ru.itis.raslgab.gowork.models.Room;
@@ -68,6 +69,12 @@ public class BookingServiceImpl implements BookingService {
         Long bookingId = bookingRepo.save(booking).getId();
         bookingApprovalService.sendOwnerApprovalRequest(bookingId);
         return bookingId;
+    }
+
+    @Override
+    @Transactional(readOnly = true)
+    public List<BookingListItemDto> getUserBookings(Long renterId) {
+        return bookingRepo.findUserBookingItems(renterId);
     }
 
     private void validateRequest(Room room, BookingCreateForm form) {

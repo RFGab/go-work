@@ -4,6 +4,7 @@ import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.data.jpa.repository.Query;
 import org.springframework.data.repository.query.Param;
 import ru.itis.raslgab.gowork.dto.BookingIntervalDto;
+import ru.itis.raslgab.gowork.dto.BookingListItemDto;
 import ru.itis.raslgab.gowork.models.Booking;
 import ru.itis.raslgab.gowork.models.enums.BookingStatus;
 
@@ -47,4 +48,28 @@ public interface BookingRepo extends JpaRepository<Booking, Long> {
             where b.id = :bookingId
             """)
     Optional<Booking> findDetailsById(@Param("bookingId") Long bookingId);
+
+    @Query("""
+            select new ru.itis.raslgab.gowork.dto.BookingListItemDto(
+                b.id,
+                room.id,
+                room.name,
+                organization.id,
+                organization.name,
+                coalesce(city.name, 'Город не указан'),
+                b.timeStart,
+                b.timeFinish,
+                b.numOfPeople,
+                b.comment,
+                b.status,
+                b.createdAt
+            )
+            from Booking b
+            join b.room room
+            join room.organization organization
+            left join organization.city city
+            where b.renter.id = :renterId
+            order by b.timeStart desc, b.createdAt desc
+            """)
+    List<BookingListItemDto> findUserBookingItems(@Param("renterId") Long renterId);
 }

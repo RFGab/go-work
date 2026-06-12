@@ -1,0 +1,72 @@
+<!DOCTYPE html>
+<html lang="ru" xmlns:th="http://www.thymeleaf.org"
+      th:replace="~{fragments/base :: html(title=~{::title}, content=~{::main})}">
+<head>
+    <title>GoWork - Мои брони</title>
+</head>
+<body>
+<main>
+    <div class="d-flex justify-content-between align-items-start gap-3 mb-4">
+        <div>
+            <h1 class="h3 mb-2">Мои брони</h1>
+            <div class="text-muted">Здесь собраны ваши заявки и подтвержденные бронирования.</div>
+        </div>
+        <a th:href="@{/rooms}" class="btn btn-outline-primary">Найти комнату</a>
+    </div>
+
+    <div th:if="${#lists.isEmpty(bookings)}" class="alert alert-light border">
+        У вас пока нет броней. Откройте каталог комнат и отправьте первую заявку.
+    </div>
+
+    <div th:if="${!#lists.isEmpty(bookings)}" class="table-responsive">
+        <table class="table table-bordered align-middle">
+            <thead>
+            <tr>
+                <th>ID</th>
+                <th>Комната</th>
+                <th>Организация</th>
+                <th>Время</th>
+                <th>Людей</th>
+                <th>Статус</th>
+                <th>Комментарий</th>
+            </tr>
+            </thead>
+            <tbody>
+            <tr th:each="booking : ${bookings}">
+                <td th:text="${booking.id}">1</td>
+                <td>
+                    <a th:href="@{/rooms/{id}(id=${booking.roomId})}"
+                       th:text="${booking.roomName}"
+                       class="text-decoration-none">Комната</a>
+                </td>
+                <td>
+                    <a th:href="@{/organizations/{id}(id=${booking.organizationId})}"
+                       th:text="${booking.organizationName}"
+                       class="text-decoration-none">Организация</a>
+                    <div class="small text-muted" th:text="${booking.cityName}">Город</div>
+                </td>
+                <td>
+                    <div>
+                        <span th:text="${#temporals.format(booking.timeStart, 'dd.MM.yyyy HH:mm')}">01.01.2026 10:00</span>
+                    </div>
+                    <div class="small text-muted">
+                        до <span th:text="${#temporals.format(booking.timeFinish, 'dd.MM.yyyy HH:mm')}">01.01.2026 12:00</span>
+                    </div>
+                </td>
+                <td th:text="${booking.numOfPeople ?: '-'}">2</td>
+                <td>
+                    <span class="badge"
+                          th:classappend="${booking.status.name() == 'CONFIRMED'} ? ' text-bg-success' :
+                            (${booking.status.name() == 'PENDING'} ? ' text-bg-warning' :
+                            (${booking.status.name() == 'REJECTED'} ? ' text-bg-danger' :
+                            (${booking.status.name() == 'CANCELLED'} ? ' text-bg-secondary' : ' text-bg-light text-dark')))"
+                          th:text="${booking.status}">PENDING</span>
+                </td>
+                <td th:text="${booking.comment ?: '-'}">Комментарий</td>
+            </tr>
+            </tbody>
+        </table>
+    </div>
+</main>
+</body>
+</html>
