@@ -43,7 +43,7 @@ public class OrganizationController {
     public String createForm(@AuthenticationPrincipal UserDetailsImpl userDetails, Model model) {
         userActionLogService.log(userDetails.getUserId(), "ORGANIZATION_CREATE_OPEN", "Organization create page opened");
         if (!model.containsAttribute("organizationForm")) {
-            model.addAttribute("organizationForm", new OrganizationCreateForm());
+            model.addAttribute("organizationForm", OrganizationCreateForm.builder().build());
         }
         return "organizations/new";
     }
@@ -137,7 +137,7 @@ public class OrganizationController {
         model.addAttribute("rooms", organizationService.getRooms(organizationId));
         model.addAttribute("statuses", OrganizationStatus.values());
 
-        if (organization.owner() && !model.containsAttribute("organizationForm")) {
+        if (organization.isOwner() && !model.containsAttribute("organizationForm")) {
             model.addAttribute("organizationForm", organizationService.getUpdateForm(organizationId, userDetails.getUserId()));
         }
     }

@@ -24,8 +24,8 @@
                 <select id="cityId" class="form-select" th:field="*{cityId}">
                     <option value="">Все города</option>
                     <option th:each="city : ${cities}"
-                            th:value="${city.id()}"
-                            th:text="${city.name()}">Город</option>
+                            th:value="${city.id}"
+                            th:text="${city.name}">Город</option>
                 </select>
             </div>
 
@@ -58,32 +58,32 @@
             <article class="border rounded p-3 h-100">
                 <div class="d-flex justify-content-between gap-3 mb-2">
                     <h2 class="h5 mb-0">
-                        <a th:href="@{/rooms/{id}(id=${room.id()})}"
-                           th:text="${room.name()}"
+                        <a th:href="@{/rooms/{id}(id=${room.id})}"
+                           th:text="${room.name}"
                            class="text-decoration-none">Комната</a>
                     </h2>
-                    <span class="badge text-bg-light" th:text="${room.status()}">AVAILABLE</span>
+                    <span class="badge text-bg-light" th:text="${room.status}">AVAILABLE</span>
                 </div>
 
                 <div class="text-muted small mb-2">
-                    <a th:href="@{/organizations/{id}(id=${room.organizationId()})}"
-                       th:text="${room.organizationName()}"
+                    <a th:href="@{/organizations/{id}(id=${room.organizationId})}"
+                       th:text="${room.organizationName}"
                        class="text-decoration-none">Организация</a>
                     <span> · </span>
-                    <span th:text="${room.cityName()}">Город</span>
+                    <span th:text="${room.cityName}">Город</span>
                 </div>
 
-                <p class="mb-3" th:text="${room.description() ?: 'Описание пока не добавлено'}">Описание</p>
+                <p class="mb-3" th:text="${room.description ?: 'Описание пока не добавлено'}">Описание</p>
 
                 <div class="small mb-3">
-                    <span th:text="${room.peopleCapacity()}">0</span>
+                    <span th:text="${room.peopleCapacity}">0</span>
                     <span> мест · </span>
-                    <span th:text="${room.pricePerHour()}">0.00</span>
+                    <span th:text="${room.pricePerHour}">0.00</span>
                     <span> ₽/час</span>
                 </div>
 
                 <div class="fw-semibold">
-                    <span th:text="${room.availableHoursToday()}">0.00</span>
+                    <span th:text="${room.availableHoursToday}">0.00</span>
                     <span> свободных часов сегодня</span>
                 </div>
             </article>
@@ -94,20 +94,20 @@
         <ul class="pagination">
             <li class="page-item" th:classappend="${roomsPage.first} ? 'disabled'">
                 <a class="page-link"
-                   th:href="@{/rooms(cityId=${filter.cityId},availableToday=${filter.availableToday},minCapacity=${filter.minCapacity},size=${filter.safeSize()},page=${roomsPage.number - 1})}">Назад</a>
+                   th:href="@{/rooms(cityId=${filter.cityId},availableToday=${filter.availableToday},minCapacity=${filter.minCapacity},size=${filter.size},page=${roomsPage.number - 1})}">Назад</a>
             </li>
 
             <li th:each="pageNumber : ${pageNumbers}"
                 class="page-item"
                 th:classappend="${pageNumber == roomsPage.number} ? 'active'">
                 <a class="page-link"
-                   th:href="@{/rooms(cityId=${filter.cityId},availableToday=${filter.availableToday},minCapacity=${filter.minCapacity},size=${filter.safeSize()},page=${pageNumber})}"
+                   th:href="@{/rooms(cityId=${filter.cityId},availableToday=${filter.availableToday},minCapacity=${filter.minCapacity},size=${filter.size},page=${pageNumber})}"
                    th:text="${pageNumber + 1}">1</a>
             </li>
 
             <li class="page-item" th:classappend="${roomsPage.last} ? 'disabled'">
                 <a class="page-link"
-                   th:href="@{/rooms(cityId=${filter.cityId},availableToday=${filter.availableToday},minCapacity=${filter.minCapacity},size=${filter.safeSize()},page=${roomsPage.number + 1})}">Вперед</a>
+                   th:href="@{/rooms(cityId=${filter.cityId},availableToday=${filter.availableToday},minCapacity=${filter.minCapacity},size=${filter.size},page=${roomsPage.number + 1})}">Вперед</a>
             </li>
         </ul>
     </nav>

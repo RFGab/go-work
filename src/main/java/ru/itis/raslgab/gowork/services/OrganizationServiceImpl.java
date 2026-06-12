@@ -71,20 +71,20 @@ public class OrganizationServiceImpl implements OrganizationService {
         boolean owner = isOwner(organization, currentUserId);
         boolean admin = currentUserRole == RoleEnum.ADMIN;
 
-        return new OrganizationDetailsDto(
-                organization.getId(),
-                organization.getName(),
-                organization.getDescription(),
-                organization.getCity() == null ? "Город не указан" : organization.getCity().getName(),
-                organization.getYandexMapLink(),
-                organization.getContactEmail(),
-                organization.getContactPhone(),
-                organization.getOwner().getFirstName() + " " + organization.getOwner().getLastName(),
-                organization.getOwner().getEmail(),
-                organization.getStatus(),
-                owner,
-                admin
-        );
+        return OrganizationDetailsDto.builder()
+                .id(organization.getId())
+                .name(organization.getName())
+                .description(organization.getDescription())
+                .cityName(organization.getCity() == null ? "Город не указан" : organization.getCity().getName())
+                .yandexMapLink(organization.getYandexMapLink())
+                .contactEmail(organization.getContactEmail())
+                .contactPhone(organization.getContactPhone())
+                .ownerFullName(organization.getOwner().getFirstName() + " " + organization.getOwner().getLastName())
+                .ownerEmail(organization.getOwner().getEmail())
+                .status(organization.getStatus())
+                .owner(owner)
+                .admin(admin)
+                .build();
     }
 
     @Override

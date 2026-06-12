@@ -27,7 +27,7 @@ public class BookingDecisionController {
                                Model model) {
         addDecisionAttributes(bookingId, action, model);
         if (!model.containsAttribute("approvalForm")) {
-            model.addAttribute("approvalForm", new BookingApprovalForm());
+            model.addAttribute("approvalForm", BookingApprovalForm.builder().build());
         }
         return "bookings/decision";
     }

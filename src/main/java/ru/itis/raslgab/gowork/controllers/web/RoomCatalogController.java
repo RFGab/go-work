@@ -47,8 +47,8 @@ public class RoomCatalogController {
                 "cityId=" + filter.getCityId()
                         + ", availableToday=" + filter.getAvailableToday()
                         + ", minCapacity=" + filter.getMinCapacity()
-                        + ", page=" + filter.safePage()
-                        + ", size=" + filter.safeSize()
+                        + ", page=" + filter.getPage()
+                        + ", size=" + filter.getSize()
         );
         return "rooms/catalog";
     }

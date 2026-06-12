@@ -1,22 +1,26 @@
 package ru.itis.raslgab.gowork.dto;
 
+import lombok.AllArgsConstructor;
+import lombok.Builder;
+import lombok.Data;
+import lombok.NoArgsConstructor;
 import ru.itis.raslgab.gowork.models.enums.OrganizationStatus;
 
-public record OrganizationDetailsDto(
-        Long id,
-        String name,
-        String description,
-        String cityName,
-        String yandexMapLink,
-        String contactEmail,
-        String contactPhone,
-        String ownerFullName,
-        String ownerEmail,
-        OrganizationStatus status,
-        boolean owner,
-        boolean admin
-) {
-    public boolean canManage() {
-        return owner || admin;
-    }
+@Data
+@Builder
+@NoArgsConstructor
+@AllArgsConstructor
+public class OrganizationDetailsDto {
+    private Long id;
+    private String name;
+    private String description;
+    private String cityName;
+    private String yandexMapLink;
+    private String contactEmail;
+    private String contactPhone;
+    private String ownerFullName;
+    private String ownerEmail;
+    private OrganizationStatus status;
+    private boolean owner;
+    private boolean admin;
 }

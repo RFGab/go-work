@@ -22,9 +22,13 @@ public interface RoomRepo extends JpaRepository<Room, Long> {
                 r.id,
                 r.name,
                 r.description,
+                null,
+                null,
+                null,
                 r.peopleCapacity,
                 r.pricePerHour,
-                r.status
+                r.status,
+                null
             )
             from Room r
             where r.organization.id = :organizationId
@@ -42,7 +46,8 @@ public interface RoomRepo extends JpaRepository<Room, Long> {
                 coalesce(c.name, 'Город не указан'),
                 r.peopleCapacity,
                 r.pricePerHour,
-                r.status
+                r.status,
+                null
             )
             from Room r
             join r.organization o
@@ -82,7 +87,8 @@ public interface RoomRepo extends JpaRepository<Room, Long> {
                 o.contactPhone,
                 r.peopleCapacity,
                 r.pricePerHour,
-                r.status
+                r.status,
+                null
             )
             from Room r
             join r.organization o

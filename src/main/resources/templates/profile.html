@@ -71,12 +71,12 @@
 
             <div th:each="organization : ${organizations}" class="border rounded p-3 mb-2">
                 <a class="fw-semibold text-decoration-none"
-                   th:href="@{/organizations/{id}(id=${organization.id()})}"
-                   th:text="${organization.name()}">Название</a>
+                   th:href="@{/organizations/{id}(id=${organization.id})}"
+                   th:text="${organization.name}">Название</a>
                 <div class="text-muted small">
-                    <span th:text="${organization.cityName()}">Город</span>
+                    <span th:text="${organization.cityName}">Город</span>
                     <span> · </span>
-                    <span th:text="${organization.roomCount()}">0</span>
+                    <span th:text="${organization.roomCount}">0</span>
                     <span> комнат</span>
                 </div>
             </div>

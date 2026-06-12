@@ -46,10 +46,10 @@ public class RoomCatalogServiceImpl implements RoomCatalogService {
     @Override
     @Transactional(readOnly = true)
     public Page<RoomCatalogItemDto> getCatalog(RoomCatalogFilterForm filter) {
-        RoomCatalogFilterForm safeFilter = filter == null ? new RoomCatalogFilterForm() : filter;
+        RoomCatalogFilterForm safeFilter = filter == null ? RoomCatalogFilterForm.builder().build() : filter;
         Pageable pageable = PageRequest.of(
-                safeFilter.safePage(),
-                safeFilter.safeSize(),
+                safePage(safeFilter.getPage()),
+                safeSize(safeFilter.getSize()),
                 Sort.by(Sort.Direction.ASC, "name")
         );
 
@@ -57,7 +57,7 @@ public class RoomCatalogServiceImpl implements RoomCatalogService {
                 safeFilter.getCityId(),
                 safeFilter.getMinCapacity(),
                 OrganizationStatus.ACTIVE,
-                safeFilter.isAvailableTodaySelected(),
+                Boolean.TRUE.equals(safeFilter.getAvailableToday()),
                 RoomStatus.AVAILABLE,
                 pageable
         );
@@ -70,7 +70,7 @@ public class RoomCatalogServiceImpl implements RoomCatalogService {
         LocalDateTime dayStart = LocalDate.now().atStartOfDay();
         LocalDateTime dayEnd = dayStart.plusDays(1);
         List<Long> roomIds = rooms.stream()
-                .map(RoomCatalogItemDto::id)
+                .map(RoomCatalogItemDto::getId)
                 .toList();
         Map<Long, List<BookingIntervalDto>> intervalsByRoom = bookingRepo.findBlockingIntervals(
                         roomIds,
@@ -81,7 +81,7 @@ public class RoomCatalogServiceImpl implements RoomCatalogService {
                 .collect(Collectors.groupingBy(BookingIntervalDto::getRoomId));
 
         List<RoomCatalogItemDto> enrichedRooms = rooms.stream()
-                .map(room -> room.withAvailableHoursToday(calculateAvailableHours(room, intervalsByRoom.get(room.id()), dayStart, dayEnd)))
+                .peek(room -> room.setAvailableHoursToday(calculateAvailableHours(room, intervalsByRoom.get(room.getId()), dayStart, dayEnd)))
                 .toList();
 
         return new PageImpl<>(
@@ -101,7 +101,7 @@ public class RoomCatalogServiceImpl implements RoomCatalogService {
                                                List<BookingIntervalDto> intervals,
                                                LocalDateTime dayStart,
                                                LocalDateTime dayEnd) {
-        if (room.status() != RoomStatus.AVAILABLE) {
+        if (room.getStatus() != RoomStatus.AVAILABLE) {
             return BigDecimal.ZERO.setScale(2, RoundingMode.HALF_UP);
         }
 
@@ -120,8 +120,8 @@ public class RoomCatalogServiceImpl implements RoomCatalogService {
                         interval.getTimeStart().isBefore(dayStart) ? dayStart : interval.getTimeStart(),
                         interval.getTimeFinish().isAfter(dayEnd) ? dayEnd : interval.getTimeFinish()
                 ))
-                .filter(range -> range.start().isBefore(range.end()))
-                .sorted(Comparator.comparing(TimeRange::start))
+                .filter(range -> range.getStart().isBefore(range.getEnd()))
+                .sorted(Comparator.comparing(TimeRange::getStart))
                 .toList();
 
         if (ranges.isEmpty()) {
@@ -132,8 +132,8 @@ public class RoomCatalogServiceImpl implements RoomCatalogService {
         TimeRange current = ranges.get(0);
         for (int i = 1; i < ranges.size(); i++) {
             TimeRange next = ranges.get(i);
-            if (!next.start().isAfter(current.end())) {
-                current = new TimeRange(current.start(), max(current.end(), next.end()));
+            if (!next.getStart().isAfter(current.getEnd())) {
+                current = new TimeRange(current.getStart(), max(current.getEnd(), next.getEnd()));
             } else {
                 merged.add(current);
                 current = next;
@@ -142,7 +142,7 @@ public class RoomCatalogServiceImpl implements RoomCatalogService {
         merged.add(current);
 
         return merged.stream()
-                .mapToLong(range -> Duration.between(range.start(), range.end()).toMinutes())
+                .mapToLong(range -> Duration.between(range.getStart(), range.getEnd()).toMinutes())
                 .sum();
     }
 
@@ -150,6 +150,32 @@ public class RoomCatalogServiceImpl implements RoomCatalogService {
         return first.isAfter(second) ? first : second;
     }
 
-    private record TimeRange(LocalDateTime start, LocalDateTime end) {
+    private int safePage(Integer page) {
+        return page == null || page < 0 ? 0 : page;
+    }
+
+    private int safeSize(Integer size) {
+        if (size == null || size < 1) {
+            return 9;
+        }
+        return Math.min(size, 30);
+    }
+
+    private static class TimeRange {
+        private final LocalDateTime start;
+        private final LocalDateTime end;
+
+        private TimeRange(LocalDateTime start, LocalDateTime end) {
+            this.start = start;
+            this.end = end;
+        }
+
+        private LocalDateTime getStart() {
+            return start;
+        }
+
+        private LocalDateTime getEnd() {
+            return end;
+        }
     }
 }

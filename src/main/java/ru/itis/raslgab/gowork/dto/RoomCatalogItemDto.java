@@ -1,54 +1,26 @@
 package ru.itis.raslgab.gowork.dto;
 
+import lombok.AllArgsConstructor;
+import lombok.Builder;
+import lombok.Data;
+import lombok.NoArgsConstructor;
 import ru.itis.raslgab.gowork.models.enums.RoomStatus;
 
 import java.math.BigDecimal;
 
-public record RoomCatalogItemDto(
-        Long id,
-        String name,
-        String description,
-        Long organizationId,
-        String organizationName,
-        String cityName,
-        Integer peopleCapacity,
-        BigDecimal pricePerHour,
-        RoomStatus status,
-        BigDecimal availableHoursToday
-) {
-    public RoomCatalogItemDto(Long id,
-                              String name,
-                              String description,
-                              Integer peopleCapacity,
-                              BigDecimal pricePerHour,
-                              RoomStatus status) {
-        this(id, name, description, null, null, null, peopleCapacity, pricePerHour, status, null);
-    }
-
-    public RoomCatalogItemDto(Long id,
-                              String name,
-                              String description,
-                              Long organizationId,
-                              String organizationName,
-                              String cityName,
-                              Integer peopleCapacity,
-                              BigDecimal pricePerHour,
-                              RoomStatus status) {
-        this(id, name, description, organizationId, organizationName, cityName, peopleCapacity, pricePerHour, status, null);
-    }
-
-    public RoomCatalogItemDto withAvailableHoursToday(BigDecimal availableHoursToday) {
-        return new RoomCatalogItemDto(
-                id,
-                name,
-                description,
-                organizationId,
-                organizationName,
-                cityName,
-                peopleCapacity,
-                pricePerHour,
-                status,
-                availableHoursToday
-        );
-    }
+@Data
+@Builder
+@NoArgsConstructor
+@AllArgsConstructor
+public class RoomCatalogItemDto {
+    private Long id;
+    private String name;
+    private String description;
+    private Long organizationId;
+    private String organizationName;
+    private String cityName;
+    private Integer peopleCapacity;
+    private BigDecimal pricePerHour;
+    private RoomStatus status;
+    private BigDecimal availableHoursToday;
 }

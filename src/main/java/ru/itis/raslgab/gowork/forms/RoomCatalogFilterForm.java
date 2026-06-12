@@ -24,19 +24,4 @@ public class RoomCatalogFilterForm {
 
     @Builder.Default
     private Integer size = 9;
-
-    public boolean isAvailableTodaySelected() {
-        return Boolean.TRUE.equals(availableToday);
-    }
-
-    public int safePage() {
-        return page == null || page < 0 ? 0 : page;
-    }
-
-    public int safeSize() {
-        if (size == null || size < 1) {
-            return 9;
-        }
-        return Math.min(size, 30);
-    }
 }

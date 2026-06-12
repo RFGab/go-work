@@ -65,7 +65,8 @@ public class RoomServiceImpl implements RoomService {
                 dayStart,
                 dayEnd
         );
-        return room.withAvailableHoursToday(calculateAvailableHours(room.getStatus(), intervals, dayStart, dayEnd));
+        room.setAvailableHoursToday(calculateAvailableHours(room.getStatus(), intervals, dayStart, dayEnd));
+        return room;
     }
 
     @Override
@@ -180,8 +181,8 @@ public class RoomServiceImpl implements RoomService {
                         interval.getTimeStart().isBefore(dayStart) ? dayStart : interval.getTimeStart(),
                         interval.getTimeFinish().isAfter(dayEnd) ? dayEnd : interval.getTimeFinish()
                 ))
-                .filter(range -> range.start().isBefore(range.end()))
-                .sorted(Comparator.comparing(TimeRange::start))
+                .filter(range -> range.getStart().isBefore(range.getEnd()))
+                .sorted(Comparator.comparing(TimeRange::getStart))
                 .toList();
 
         if (ranges.isEmpty()) {
@@ -192,8 +193,8 @@ public class RoomServiceImpl implements RoomService {
         TimeRange current = ranges.get(0);
         for (int i = 1; i < ranges.size(); i++) {
             TimeRange next = ranges.get(i);
-            if (!next.start().isAfter(current.end())) {
-                current = new TimeRange(current.start(), max(current.end(), next.end()));
+            if (!next.getStart().isAfter(current.getEnd())) {
+                current = new TimeRange(current.getStart(), max(current.getEnd(), next.getEnd()));
             } else {
                 merged.add(current);
                 current = next;
@@ -202,7 +203,7 @@ public class RoomServiceImpl implements RoomService {
         merged.add(current);
 
         return merged.stream()
-                .mapToLong(range -> Duration.between(range.start(), range.end()).toMinutes())
+                .mapToLong(range -> Duration.between(range.getStart(), range.getEnd()).toMinutes())
                 .sum();
     }
 
@@ -210,6 +211,21 @@ public class RoomServiceImpl implements RoomService {
         return first.isAfter(second) ? first : second;
     }
 
-    private record TimeRange(LocalDateTime start, LocalDateTime end) {
+    private static class TimeRange {
+        private final LocalDateTime start;
+        private final LocalDateTime end;
+
+        private TimeRange(LocalDateTime start, LocalDateTime end) {
+            this.start = start;
+            this.end = end;
+        }
+
+        private LocalDateTime getStart() {
+            return start;
+        }
+
+        private LocalDateTime getEnd() {
+            return end;
+        }
     }
 }

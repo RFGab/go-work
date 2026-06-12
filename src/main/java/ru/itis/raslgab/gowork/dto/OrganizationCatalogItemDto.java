@@ -1,12 +1,20 @@
 package ru.itis.raslgab.gowork.dto;
 
-public record OrganizationCatalogItemDto(
-        Long id,
-        String name,
-        String description,
-        String cityName,
-        String contactEmail,
-        String contactPhone,
-        Long roomCount
-) {
+import lombok.AllArgsConstructor;
+import lombok.Builder;
+import lombok.Data;
+import lombok.NoArgsConstructor;
+
+@Data
+@Builder
+@NoArgsConstructor
+@AllArgsConstructor
+public class OrganizationCatalogItemDto {
+    private Long id;
+    private String name;
+    private String description;
+    private String cityName;
+    private String contactEmail;
+    private String contactPhone;
+    private Long roomCount;
 }

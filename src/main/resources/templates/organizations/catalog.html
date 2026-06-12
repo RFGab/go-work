@@ -20,9 +20,9 @@
             <select id="cityId" name="cityId" class="form-select">
                 <option value="">Все города</option>
                 <option th:each="city : ${cities}"
-                        th:value="${city.id()}"
-                        th:text="${city.name()}"
-                        th:selected="${city.id() == selectedCityId}">Город</option>
+                        th:value="${city.id}"
+                        th:text="${city.name}"
+                        th:selected="${city.id == selectedCityId}">Город</option>
             </select>
         </div>
         <div class="col-auto">
@@ -43,18 +43,18 @@
                 <div class="d-flex justify-content-between gap-3 mb-2">
                     <h2 class="h5 mb-0">
                         <a class="text-decoration-none"
-                           th:href="@{/organizations/{id}(id=${organization.id()})}"
-                           th:text="${organization.name()}">Организация</a>
+                           th:href="@{/organizations/{id}(id=${organization.id})}"
+                           th:text="${organization.name}">Организация</a>
                     </h2>
-                    <span class="badge text-bg-light" th:text="${organization.roomCount()} + ' комнат'">0 комнат</span>
+                    <span class="badge text-bg-light" th:text="${organization.roomCount} + ' комнат'">0 комнат</span>
                 </div>
 
-                <div class="text-muted small mb-3" th:text="${organization.cityName()}">Город</div>
-                <p class="mb-3" th:text="${organization.description() ?: 'Описание пока не добавлено'}">Описание</p>
+                <div class="text-muted small mb-3" th:text="${organization.cityName}">Город</div>
+                <p class="mb-3" th:text="${organization.description ?: 'Описание пока не добавлено'}">Описание</p>
 
                 <div class="small text-muted">
-                    <div th:if="${organization.contactEmail()}" th:text="'Email: ' + ${organization.contactEmail()}">Email</div>
-                    <div th:if="${organization.contactPhone()}" th:text="'Телефон: ' + ${organization.contactPhone()}">Телефон</div>
+                    <div th:if="${organization.contactEmail}" th:text="'Email: ' + ${organization.contactEmail}">Email</div>
+                    <div th:if="${organization.contactPhone}" th:text="'Телефон: ' + ${organization.contactPhone}">Телефон</div>
                 </div>
             </article>
         </div>
