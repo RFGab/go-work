@@ -37,6 +37,11 @@ public interface BookingRepo extends JpaRepository<Booking, Long> {
                                                                                   LocalDateTime timeFinish,
                                                                                  LocalDateTime timeStart);
 
+    boolean existsByRenterIdAndRoomOrganizationIdAndStatusAndTimeFinishBefore(Long renterId,
+                                                                              Long organizationId,
+                                                                              BookingStatus status,
+                                                                              LocalDateTime timeFinish);
+
     @Query("""
             select b
             from Booking b

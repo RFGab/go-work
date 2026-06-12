@@ -16,5 +16,6 @@ public class OrganizationCatalogItemDto {
     private String cityName;
     private String contactEmail;
     private String contactPhone;
+    private String logoFileName;
     private Long roomCount;
 }

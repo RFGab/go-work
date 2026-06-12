@@ -33,6 +33,7 @@ public interface OrganizationRepo extends JpaRepository<Organization, Long> {
             from Organization o
             left join fetch o.city
             left join fetch o.owner
+            left join fetch o.logo
             where o.id = :organizationId
             """)
     Optional<Organization> findDetailsById(@Param("organizationId") Long organizationId);
@@ -45,14 +46,16 @@ public interface OrganizationRepo extends JpaRepository<Organization, Long> {
                 coalesce(c.name, 'Город не указан'),
                 o.contactEmail,
                 o.contactPhone,
+                logo.storageFileName,
                 count(r.id)
             )
             from Organization o
             left join o.city c
+            left join o.logo logo
             left join o.rooms r
             where o.status = :status
               and (:cityId is null or c.id = :cityId)
-            group by o.id, o.name, o.description, c.name, o.contactEmail, o.contactPhone
+            group by o.id, o.name, o.description, c.name, o.contactEmail, o.contactPhone, logo.storageFileName
             order by o.name
             """)
     List<OrganizationCatalogItemDto> findCatalogItems(@Param("cityId") Long cityId,

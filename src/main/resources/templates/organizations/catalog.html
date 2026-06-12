@@ -40,6 +40,19 @@
     <div class="row g-3">
         <div th:each="organization : ${organizations}" class="col-md-6 col-xl-4">
             <article class="border rounded p-3 h-100">
+                <div class="mb-3">
+                    <img th:if="${organization.logoFileName}"
+                         th:src="@{/img/{fileName}(fileName=${organization.logoFileName})}"
+                         alt="Логотип организации"
+                         class="img-fluid rounded border w-100"
+                         style="height: 140px; object-fit: contain;">
+                    <div th:unless="${organization.logoFileName}"
+                         class="border rounded bg-light text-muted d-flex align-items-center justify-content-center"
+                         style="height: 140px;">
+                        Логотип не загружен
+                    </div>
+                </div>
+
                 <div class="d-flex justify-content-between gap-3 mb-2">
                     <h2 class="h5 mb-0">
                         <a class="text-decoration-none"

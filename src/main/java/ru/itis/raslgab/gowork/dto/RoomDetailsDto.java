@@ -7,6 +7,7 @@ import lombok.NoArgsConstructor;
 import ru.itis.raslgab.gowork.models.enums.RoomStatus;
 
 import java.math.BigDecimal;
+import java.util.List;
 
 @Data
 @Builder
@@ -26,4 +27,6 @@ public class RoomDetailsDto {
     private BigDecimal pricePerHour;
     private RoomStatus status;
     private BigDecimal availableHoursToday;
+    private List<String> imageFileNames;
+    private boolean canManage;
 }

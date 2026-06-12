@@ -18,6 +18,7 @@ public class OrganizationDetailsDto {
     private String yandexMapLink;
     private String contactEmail;
     private String contactPhone;
+    private String logoFileName;
     private String ownerFullName;
     private String ownerEmail;
     private OrganizationStatus status;

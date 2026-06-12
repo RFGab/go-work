@@ -24,6 +24,23 @@
 
     <div class="row g-4">
         <section class="col-lg-8">
+            <section class="mb-4">
+                <h2 class="h4 mb-3">Фото комнаты</h2>
+                <div th:if="${#lists.isEmpty(room.imageFileNames)}"
+                     class="border rounded bg-light text-muted d-flex align-items-center justify-content-center"
+                     style="height: 180px;">
+                    Фото пока не загружены
+                </div>
+                <div th:if="${!#lists.isEmpty(room.imageFileNames)}" class="row g-2">
+                    <div th:each="imageFileName : ${room.imageFileNames}" class="col-md-6">
+                        <img th:src="@{/img/{fileName}(fileName=${imageFileName})}"
+                             alt="Фото комнаты"
+                             class="img-fluid rounded border w-100"
+                             style="height: 220px; object-fit: cover;">
+                    </div>
+                </div>
+            </section>
+
             <h2 class="h4 mb-3">Информация</h2>
 
             <dl class="row">
@@ -140,6 +157,18 @@
         </section>
 
         <aside class="col-lg-4">
+            <div th:if="${canManageRoom}" class="border rounded p-3 mb-3">
+                <h2 class="h5 mb-3">Фото комнаты</h2>
+                <form th:action="@{/rooms/{id}/images(id=${room.id})}"
+                      method="post"
+                      enctype="multipart/form-data"
+                      class="vstack gap-2">
+                    <input type="file" name="images" accept="image/*" multiple class="form-control">
+                    <div th:if="${imageError}" class="text-danger small" th:text="${imageError}"></div>
+                    <button type="submit" class="btn btn-outline-primary">Добавить фото</button>
+                </form>
+            </div>
+
             <div class="border rounded p-3">
                 <h2 class="h5 mb-3">Контакты организации</h2>
 

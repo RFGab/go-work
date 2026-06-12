@@ -8,6 +8,7 @@ import ru.itis.raslgab.gowork.forms.OrganizationCreateForm;
 import ru.itis.raslgab.gowork.forms.OrganizationUpdateForm;
 import ru.itis.raslgab.gowork.models.enums.OrganizationStatus;
 import ru.itis.raslgab.gowork.models.enums.RoleEnum;
+import org.springframework.web.multipart.MultipartFile;
 
 import java.util.List;
 
@@ -27,6 +28,8 @@ public interface OrganizationService {
     void updateOrganization(Long organizationId, Long ownerId, OrganizationUpdateForm form);
 
     void updateStatus(Long organizationId, Long currentUserId, RoleEnum currentUserRole, OrganizationStatus status);
+
+    void updateLogo(Long organizationId, Long currentUserId, RoleEnum currentUserRole, MultipartFile logo);
 
     void deleteOrganization(Long organizationId, Long currentUserId, RoleEnum currentUserRole);
 }

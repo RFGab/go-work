@@ -2,32 +2,34 @@ package ru.itis.raslgab.gowork.controllers.error;
 
 import jakarta.servlet.RequestDispatcher;
 import jakarta.servlet.http.HttpServletRequest;
+import jakarta.servlet.http.HttpServletResponse;
+import org.springframework.boot.webmvc.error.ErrorController;
 import org.springframework.http.HttpStatus;
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
-import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.RequestMapping;
 
 @Controller
 @RequestMapping("/error")
-public class AppErrorController {
+public class AppErrorController implements ErrorController {
 
-    @GetMapping
-    public String error(HttpServletRequest request, Model model) {
+    @RequestMapping
+    public String error(HttpServletRequest request, HttpServletResponse response, Model model) {
         Object statusCode = request.getAttribute(RequestDispatcher.ERROR_STATUS_CODE);
         int status = statusCode == null ? 500 : Integer.parseInt(statusCode.toString());
-        return fillModel(status, request.getRequestURI(), model);
+        return fillModel(status, errorPath(request), response, model);
     }
 
-    @GetMapping("/{status}")
-    public String errorByStatus(@PathVariable int status, HttpServletRequest request, Model model) {
-        return fillModel(status, request.getRequestURI(), model);
+    @RequestMapping("/{status}")
+    public String errorByStatus(@PathVariable int status, HttpServletRequest request, HttpServletResponse response, Model model) {
+        return fillModel(status, request.getRequestURI(), response, model);
     }
 
-    private String fillModel(int status, String path, Model model) {
+    private String fillModel(int status, String path, HttpServletResponse response, Model model) {
         HttpStatus httpStatus = HttpStatus.resolve(status);
         int safeStatus = httpStatus == null ? 500 : httpStatus.value();
+        response.setStatus(safeStatus);
         model.addAttribute("status", safeStatus);
         model.addAttribute("path", path);
 
@@ -43,5 +45,10 @@ public class AppErrorController {
         }
 
         return "error/error";
+    }
+
+    private String errorPath(HttpServletRequest request) {
+        Object path = request.getAttribute(RequestDispatcher.ERROR_REQUEST_URI);
+        return path == null ? request.getRequestURI() : path.toString();
     }
 }

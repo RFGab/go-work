@@ -42,7 +42,11 @@ public class BookingApprovalServiceImpl implements BookingApprovalService {
         dto.setApprovalCode(code);
         dto.setApproveUrl(decisionUrl(bookingId, "approve"));
         dto.setRejectUrl(decisionUrl(bookingId, "reject"));
-        mailService.sendBookingApprovalRequest(dto);
+        try {
+            mailService.sendBookingApprovalRequest(dto);
+        } catch (Exception e) {
+            log.error("Failed to send booking approval email for bookingId={}: {}", bookingId, e.getMessage(), e);
+        }
     }
 
     @Override
@@ -79,10 +83,10 @@ public class BookingApprovalServiceImpl implements BookingApprovalService {
         if ("approve".equals(normalizedAction)) {
             booking.setStatus(BookingStatus.CONFIRMED);
             byte[] qrCode = generateQrSafely(dto);
-            mailService.sendBookingApproved(dto, qrCode);
+            trySendApproved(dto, qrCode);
         } else {
             booking.setStatus(BookingStatus.REJECTED);
-            mailService.sendBookingRejected(dto);
+            trySendRejected(dto);
         }
         redisTemplate.delete(redisKey(bookingId));
     }
@@ -143,6 +147,22 @@ public class BookingApprovalServiceImpl implements BookingApprovalService {
         } catch (Exception e) {
             log.error("Failed to generate QR for bookingId={}", dto.getBookingId(), e);
             return new byte[0];
+        }
+    }
+
+    private void trySendApproved(BookingMailDto dto, byte[] qrCode) {
+        try {
+            mailService.sendBookingApproved(dto, qrCode);
+        } catch (Exception e) {
+            log.error("Failed to send booking approved email for bookingId={}: {}", dto.getBookingId(), e.getMessage(), e);
+        }
+    }
+
+    private void trySendRejected(BookingMailDto dto) {
+        try {
+            mailService.sendBookingRejected(dto);
+        } catch (Exception e) {
+            log.error("Failed to send booking rejected email for bookingId={}: {}", dto.getBookingId(), e.getMessage(), e);
         }
     }
 }

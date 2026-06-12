@@ -12,13 +12,16 @@ import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestParam;
+import org.springframework.web.multipart.MultipartFile;
 import org.springframework.web.servlet.mvc.support.RedirectAttributes;
 import ru.itis.raslgab.gowork.dto.OrganizationDetailsDto;
 import ru.itis.raslgab.gowork.forms.OrganizationCreateForm;
 import ru.itis.raslgab.gowork.forms.OrganizationUpdateForm;
+import ru.itis.raslgab.gowork.forms.ReviewForm;
 import ru.itis.raslgab.gowork.models.enums.OrganizationStatus;
 import ru.itis.raslgab.gowork.security.UserDetailsImpl;
 import ru.itis.raslgab.gowork.services.OrganizationService;
+import ru.itis.raslgab.gowork.services.ReviewService;
 import ru.itis.raslgab.gowork.services.UserActionLogService;
 
 @Controller
@@ -26,6 +29,7 @@ import ru.itis.raslgab.gowork.services.UserActionLogService;
 @RequiredArgsConstructor
 public class OrganizationController {
     private final OrganizationService organizationService;
+    private final ReviewService reviewService;
     private final UserActionLogService userActionLogService;
 
     @GetMapping
@@ -108,6 +112,23 @@ public class OrganizationController {
         return "redirect:/organizations/" + organizationId;
     }
 
+    @PostMapping("/{organizationId}/logo")
+    public String updateLogo(@AuthenticationPrincipal UserDetailsImpl userDetails,
+                             @PathVariable Long organizationId,
+                             @RequestParam("logo") MultipartFile logo,
+                             RedirectAttributes redirectAttributes) {
+        Long userId = userDetails.getUserId();
+        try {
+            organizationService.updateLogo(organizationId, userId, userDetails.getUser().getRole(), logo);
+            userActionLogService.log(userId, "ORGANIZATION_LOGO_UPDATE_SUCCESS", "organizationId=" + organizationId);
+            redirectAttributes.addFlashAttribute("successMessage", "Логотип организации обновлен");
+        } catch (IllegalArgumentException e) {
+            userActionLogService.log(userId, "ORGANIZATION_LOGO_UPDATE_FAILED", "organizationId=" + organizationId + ", " + e.getMessage());
+            redirectAttributes.addFlashAttribute("logoError", e.getMessage());
+        }
+        return "redirect:/organizations/" + organizationId;
+    }
+
     @PostMapping("/{organizationId}/delete")
     public String delete(@AuthenticationPrincipal UserDetailsImpl userDetails,
                          @PathVariable Long organizationId,
@@ -136,6 +157,9 @@ public class OrganizationController {
         model.addAttribute("organization", organization);
         model.addAttribute("rooms", organizationService.getRooms(organizationId));
         model.addAttribute("statuses", OrganizationStatus.values());
+        model.addAttribute("reviews", reviewService.getOrganizationReviews(organizationId, userDetails.getUserId()));
+        model.addAttribute("canCreateReview", reviewService.canCreateReview(organizationId, userDetails.getUserId()));
+        model.addAttribute("reviewForm", ReviewForm.builder().rating(5).build());
 
         if (organization.isOwner() && !model.containsAttribute("organizationForm")) {
             model.addAttribute("organizationForm", organizationService.getUpdateForm(organizationId, userDetails.getUserId()));

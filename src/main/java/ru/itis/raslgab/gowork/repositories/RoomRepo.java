@@ -88,7 +88,9 @@ public interface RoomRepo extends JpaRepository<Room, Long> {
                 r.peopleCapacity,
                 r.pricePerHour,
                 r.status,
-                null
+                null,
+                null,
+                false
             )
             from Room r
             join r.organization o
@@ -96,6 +98,16 @@ public interface RoomRepo extends JpaRepository<Room, Long> {
             where r.id = :roomId
             """)
     Optional<RoomDetailsDto> findDetailsById(@Param("roomId") Long roomId);
+
+    @Query("""
+            select distinct r
+            from Room r
+            left join fetch r.images images
+            join fetch r.organization organization
+            left join fetch organization.owner owner
+            where r.id = :roomId
+            """)
+    Optional<Room> findByIdWithImages(@Param("roomId") Long roomId);
 
     @Query("""
             select new ru.itis.raslgab.gowork.dto.RoomOptionDto(

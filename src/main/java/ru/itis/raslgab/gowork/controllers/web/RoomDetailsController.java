@@ -13,6 +13,7 @@ import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestParam;
+import org.springframework.web.multipart.MultipartFile;
 import org.springframework.web.servlet.mvc.support.RedirectAttributes;
 import ru.itis.raslgab.gowork.forms.BookingCreateForm;
 import ru.itis.raslgab.gowork.security.UserDetailsImpl;
@@ -21,6 +22,7 @@ import ru.itis.raslgab.gowork.services.RoomService;
 import ru.itis.raslgab.gowork.services.UserActionLogService;
 
 import java.time.LocalDate;
+import java.util.List;
 
 @Controller
 @RequestMapping("/rooms")
@@ -37,7 +39,7 @@ public class RoomDetailsController {
                        @DateTimeFormat(iso = DateTimeFormat.ISO.DATE) LocalDate bookingDate,
                        Model model) {
         LocalDate selectedDate = bookingDate == null ? LocalDate.now() : bookingDate;
-        addRoomPageAttributes(roomId, selectedDate, model);
+        addRoomPageAttributes(userDetails, roomId, selectedDate, model);
         if (!model.containsAttribute("bookingForm")) {
             model.addAttribute("bookingForm", BookingCreateForm.builder()
                     .bookingDate(selectedDate)
@@ -58,7 +60,7 @@ public class RoomDetailsController {
         LocalDate selectedDate = form.getBookingDate() == null ? LocalDate.now() : form.getBookingDate();
 
         if (bindingResult.hasErrors()) {
-            addRoomPageAttributes(roomId, selectedDate, model);
+            addRoomPageAttributes(userDetails, roomId, selectedDate, model);
             userActionLogService.log(userId, "BOOKING_CREATE_FAILED", "roomId=" + roomId + ", validation errors");
             return "rooms/show";
         }
@@ -70,17 +72,35 @@ public class RoomDetailsController {
             return "redirect:/rooms/" + roomId + "?bookingDate=" + selectedDate;
         } catch (IllegalArgumentException e) {
             bindingResult.reject("booking.invalid", e.getMessage());
-            addRoomPageAttributes(roomId, selectedDate, model);
+            addRoomPageAttributes(userDetails, roomId, selectedDate, model);
             userActionLogService.log(userId, "BOOKING_CREATE_FAILED", "roomId=" + roomId + ", " + e.getMessage());
             return "rooms/show";
         }
     }
 
-    private void addRoomPageAttributes(Long roomId, LocalDate selectedDate, Model model) {
+    @PostMapping("/{roomId}/images")
+    public String addImages(@AuthenticationPrincipal UserDetailsImpl userDetails,
+                            @PathVariable Long roomId,
+                            @RequestParam("images") List<MultipartFile> images,
+                            RedirectAttributes redirectAttributes) {
+        Long userId = userDetails.getUserId();
+        try {
+            roomService.addRoomImages(roomId, userId, userDetails.getUser().getRole(), images);
+            userActionLogService.log(userId, "ROOM_IMAGES_UPLOAD_SUCCESS", "roomId=" + roomId);
+            redirectAttributes.addFlashAttribute("successMessage", "Фото комнаты добавлены");
+        } catch (IllegalArgumentException e) {
+            userActionLogService.log(userId, "ROOM_IMAGES_UPLOAD_FAILED", "roomId=" + roomId + ", " + e.getMessage());
+            redirectAttributes.addFlashAttribute("imageError", e.getMessage());
+        }
+        return "redirect:/rooms/" + roomId;
+    }
+
+    private void addRoomPageAttributes(UserDetailsImpl userDetails, Long roomId, LocalDate selectedDate, Model model) {
         model.addAttribute("room", roomService.getRoomDetails(roomId));
         model.addAttribute("selectedDate", selectedDate);
         model.addAttribute("hourSlots", roomService.getHourSlots(roomId, selectedDate));
         model.addAttribute("options", roomService.getOptions(roomId));
         model.addAttribute("similarRooms", roomService.getSimilarRooms(roomId));
+        model.addAttribute("canManageRoom", roomService.canManageRoom(roomId, userDetails.getUserId(), userDetails.getUser().getRole()));
     }
 }

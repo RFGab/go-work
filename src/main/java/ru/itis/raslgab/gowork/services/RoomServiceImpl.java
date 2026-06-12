@@ -4,18 +4,22 @@ import lombok.RequiredArgsConstructor;
 import org.springframework.security.access.AccessDeniedException;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
+import org.springframework.web.multipart.MultipartFile;
 import ru.itis.raslgab.gowork.dto.BookingIntervalDto;
 import ru.itis.raslgab.gowork.dto.BookingHourSlotDto;
 import ru.itis.raslgab.gowork.dto.RoomDetailsDto;
 import ru.itis.raslgab.gowork.dto.RoomOptionDto;
 import ru.itis.raslgab.gowork.dto.SimilarRoomDto;
 import ru.itis.raslgab.gowork.forms.RoomCreateForm;
+import ru.itis.raslgab.gowork.models.FileInfo;
 import ru.itis.raslgab.gowork.models.Organization;
 import ru.itis.raslgab.gowork.models.Room;
 import ru.itis.raslgab.gowork.models.enums.BookingStatus;
 import ru.itis.raslgab.gowork.models.enums.OrganizationStatus;
+import ru.itis.raslgab.gowork.models.enums.RoleEnum;
 import ru.itis.raslgab.gowork.models.enums.RoomStatus;
 import ru.itis.raslgab.gowork.repositories.BookingRepo;
+import ru.itis.raslgab.gowork.repositories.FileInfoRepo;
 import ru.itis.raslgab.gowork.repositories.OrganizationRepo;
 import ru.itis.raslgab.gowork.repositories.RoomRepo;
 
@@ -26,7 +30,9 @@ import java.time.LocalDate;
 import java.time.LocalDateTime;
 import java.util.ArrayList;
 import java.util.Comparator;
+import java.util.HashSet;
 import java.util.List;
+import java.util.Set;
 
 @Service
 @RequiredArgsConstructor
@@ -45,6 +51,8 @@ public class RoomServiceImpl implements RoomService {
     private final RoomRepo roomRepo;
     private final OrganizationRepo organizationRepo;
     private final BookingRepo bookingRepo;
+    private final FileInfoRepo fileInfoRepo;
+    private final FileStorageService fileStorageService;
 
     @Override
     public List<RoomStatus> getCreateStatuses() {
@@ -66,6 +74,7 @@ public class RoomServiceImpl implements RoomService {
                 dayEnd
         );
         room.setAvailableHoursToday(calculateAvailableHours(room.getStatus(), intervals, dayStart, dayEnd));
+        room.setImageFileNames(getRoomImageFileNames(roomId));
         return room;
     }
 
@@ -147,8 +156,71 @@ public class RoomServiceImpl implements RoomService {
         return roomRepo.save(room).getId();
     }
 
+    @Override
+    @Transactional(readOnly = true)
+    public boolean canManageRoom(Long roomId, Long currentUserId, RoleEnum currentUserRole) {
+        Room room = roomRepo.findById(roomId)
+                .orElseThrow(() -> new IllegalArgumentException("Комната не найдена"));
+        return isRoomManager(room, currentUserId, currentUserRole);
+    }
+
+    @Override
+    @Transactional
+    public void addRoomImages(Long roomId, Long currentUserId, RoleEnum currentUserRole, List<MultipartFile> images) {
+        Room room = roomRepo.findByIdWithImages(roomId)
+                .orElseThrow(() -> new IllegalArgumentException("Комната не найдена"));
+        checkRoomManager(room, currentUserId, currentUserRole);
+
+        List<MultipartFile> validImages = images == null ? List.of() : images.stream()
+                .filter(file -> file != null && !file.isEmpty())
+                .toList();
+        if (validImages.isEmpty()) {
+            throw new IllegalArgumentException("Выберите хотя бы одно фото комнаты");
+        }
+
+        Set<FileInfo> roomImages = room.getImages() == null ? new HashSet<>() : new HashSet<>(room.getImages());
+        for (MultipartFile image : validImages) {
+            validateImage(image);
+            String fileName = fileStorageService.saveFile(image);
+            roomImages.add(fileInfoRepo.findByStorageFileName(fileName));
+        }
+        room.setImages(roomImages);
+        roomRepo.save(room);
+    }
+
     private String trimToNull(String value) {
         return value == null || value.isBlank() ? null : value.trim();
+    }
+
+    private List<String> getRoomImageFileNames(Long roomId) {
+        return roomRepo.findByIdWithImages(roomId)
+                .map(room -> room.getImages() == null ? List.<String>of() : room.getImages().stream()
+                        .map(FileInfo::getStorageFileName)
+                        .toList())
+                .orElse(List.of());
+    }
+
+    private void checkRoomManager(Room room, Long currentUserId, RoleEnum currentUserRole) {
+        if (!isRoomManager(room, currentUserId, currentUserRole)) {
+            throw new AccessDeniedException("Управлять фото комнаты может только владелец организации или администратор");
+        }
+    }
+
+    private boolean isRoomManager(Room room, Long currentUserId, RoleEnum currentUserRole) {
+        if (currentUserRole == RoleEnum.ADMIN) {
+            return true;
+        }
+        Organization organization = room.getOrganization();
+        return organization != null
+                && organization.getOwner() != null
+                && organization.getOwner().getId().equals(currentUserId);
+    }
+
+    private void validateImage(MultipartFile image) {
+        String contentType = image.getContentType();
+        if (contentType == null || !contentType.startsWith("image/")) {
+            throw new IllegalArgumentException("Можно загрузить только изображения");
+        }
     }
 
     private boolean overlaps(LocalDateTime firstStart,
