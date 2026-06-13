@@ -2,6 +2,8 @@ package ru.itis.raslgab.gowork.services;
 
 import lombok.RequiredArgsConstructor;
 import org.springframework.dao.DataIntegrityViolationException;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.PageRequest;
 import org.springframework.security.access.AccessDeniedException;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
@@ -11,6 +13,7 @@ import ru.itis.raslgab.gowork.dto.OrganizationCatalogItemDto;
 import ru.itis.raslgab.gowork.dto.OrganizationDetailsDto;
 import ru.itis.raslgab.gowork.dto.RoomCatalogItemDto;
 import ru.itis.raslgab.gowork.forms.OrganizationCreateForm;
+import ru.itis.raslgab.gowork.forms.OrganizationCatalogFilterForm;
 import ru.itis.raslgab.gowork.forms.OrganizationUpdateForm;
 import ru.itis.raslgab.gowork.models.City;
 import ru.itis.raslgab.gowork.models.FileInfo;
@@ -44,6 +47,28 @@ public class OrganizationServiceImpl implements OrganizationService {
 
     @Override
     @Transactional(readOnly = true)
+    public Page<OrganizationCatalogItemDto> getCatalog(OrganizationCatalogFilterForm filter) {
+        int page = filter.getPage() == null || filter.getPage() < 0 ? 0 : filter.getPage();
+        int size = filter.getSize() == null || filter.getSize() < 1 ? 9 : Math.min(filter.getSize(), 30);
+        String namePattern = toLikePattern(filter.getName());
+        PageRequest pageRequest = PageRequest.of(page, size);
+        if (namePattern == null) {
+            return organizationRepo.findCatalogItemsPage(
+                    filter.getCityId(),
+                    OrganizationStatus.ACTIVE,
+                    pageRequest
+            );
+        }
+        return organizationRepo.findCatalogItemsPageByName(
+                filter.getCityId(),
+                namePattern,
+                OrganizationStatus.ACTIVE,
+                pageRequest
+        );
+    }
+
+    @Override
+    @Transactional(readOnly = true)
     public List<CityOptionDto> getCityOptions() {
         return cityRepo.findOptions();
     }
@@ -53,7 +78,8 @@ public class OrganizationServiceImpl implements OrganizationService {
     public Long createOrganization(Long ownerId, OrganizationCreateForm form) {
         User owner = userRepo.findById(ownerId)
                 .orElseThrow(() -> new IllegalStateException("Текущий пользователь не найден"));
-        City city = getOrCreateCity(form.getCityName());
+        City city = cityRepo.findById(form.getCityId())
+                .orElseThrow(() -> new IllegalArgumentException("Город не найден"));
 
         Organization organization = Organization.builder()
                 .name(form.getName().trim())
@@ -200,6 +226,11 @@ public class OrganizationServiceImpl implements OrganizationService {
 
     private String trimToNull(String value) {
         return value == null || value.isBlank() ? null : value.trim();
+    }
+
+    private String toLikePattern(String value) {
+        String normalized = trimToNull(value);
+        return normalized == null ? null : "%" + normalized.toLowerCase() + "%";
     }
 
     private void validateImage(MultipartFile file, String emptyMessage) {

@@ -1,17 +1,20 @@
 package ru.itis.raslgab.gowork.services;
 
 import lombok.RequiredArgsConstructor;
+import org.springframework.data.domain.PageRequest;
 import org.springframework.security.access.AccessDeniedException;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import org.springframework.web.multipart.MultipartFile;
 import ru.itis.raslgab.gowork.dto.BookingIntervalDto;
 import ru.itis.raslgab.gowork.dto.BookingHourSlotDto;
+import ru.itis.raslgab.gowork.dto.PopularRoomDto;
 import ru.itis.raslgab.gowork.dto.RoomDetailsDto;
 import ru.itis.raslgab.gowork.dto.RoomOptionDto;
 import ru.itis.raslgab.gowork.dto.SimilarRoomDto;
 import ru.itis.raslgab.gowork.forms.RoomCreateForm;
 import ru.itis.raslgab.gowork.models.FileInfo;
+import ru.itis.raslgab.gowork.models.Option;
 import ru.itis.raslgab.gowork.models.Organization;
 import ru.itis.raslgab.gowork.models.Room;
 import ru.itis.raslgab.gowork.models.enums.BookingStatus;
@@ -21,6 +24,7 @@ import ru.itis.raslgab.gowork.models.enums.RoomStatus;
 import ru.itis.raslgab.gowork.repositories.BookingRepo;
 import ru.itis.raslgab.gowork.repositories.FileInfoRepo;
 import ru.itis.raslgab.gowork.repositories.OrganizationRepo;
+import ru.itis.raslgab.gowork.repositories.OptionRepo;
 import ru.itis.raslgab.gowork.repositories.RoomRepo;
 
 import java.math.BigDecimal;
@@ -53,6 +57,7 @@ public class RoomServiceImpl implements RoomService {
     private final BookingRepo bookingRepo;
     private final FileInfoRepo fileInfoRepo;
     private final FileStorageService fileStorageService;
+    private final OptionRepo optionRepo;
 
     @Override
     public List<RoomStatus> getCreateStatuses() {
@@ -122,6 +127,12 @@ public class RoomServiceImpl implements RoomService {
 
     @Override
     @Transactional(readOnly = true)
+    public List<RoomOptionDto> getAllOptions() {
+        return optionRepo.findAllOptions();
+    }
+
+    @Override
+    @Transactional(readOnly = true)
     public List<SimilarRoomDto> getSimilarRooms(Long roomId) {
         RoomDetailsDto room = roomRepo.findDetailsById(roomId)
                 .orElseThrow(() -> new IllegalArgumentException("Комната не найдена"));
@@ -135,6 +146,12 @@ public class RoomServiceImpl implements RoomService {
     }
 
     @Override
+    @Transactional(readOnly = true)
+    public List<PopularRoomDto> getPopularRooms() {
+        return roomRepo.findPopularRooms(OrganizationStatus.ACTIVE, PageRequest.of(0, 3));
+    }
+
+    @Override
     @Transactional
     public Long createRoom(Long organizationId, Long ownerId, RoomCreateForm form) {
         Organization organization = organizationRepo.findDetailsById(organizationId)
@@ -144,6 +161,10 @@ public class RoomServiceImpl implements RoomService {
             throw new AccessDeniedException("Создавать комнаты может только владелец организации");
         }
 
+        Set<Option> options = form.getOptionIds() == null || form.getOptionIds().isEmpty()
+                ? Set.of()
+                : new HashSet<>(optionRepo.findAllById(form.getOptionIds()));
+
         Room room = Room.builder()
                 .name(form.getName().trim())
                 .description(trimToNull(form.getDescription()))
@@ -151,6 +172,7 @@ public class RoomServiceImpl implements RoomService {
                 .pricePerHour(form.getPricePerHour())
                 .status(form.getStatus())
                 .organization(organization)
+                .options(options)
                 .build();
 
         return roomRepo.save(room).getId();
@@ -186,6 +208,15 @@ public class RoomServiceImpl implements RoomService {
         }
         room.setImages(roomImages);
         roomRepo.save(room);
+    }
+
+    @Override
+    @Transactional
+    public void updateStatus(Long roomId, Long currentUserId, RoleEnum currentUserRole, RoomStatus status) {
+        Room room = roomRepo.findByIdWithImages(roomId)
+                .orElseThrow(() -> new IllegalArgumentException("Комната не найдена"));
+        checkRoomManager(room, currentUserId, currentUserRole);
+        room.setStatus(status);
     }
 
     private String trimToNull(String value) {

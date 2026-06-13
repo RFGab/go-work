@@ -6,6 +6,7 @@ import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.data.jpa.repository.Query;
 import org.springframework.data.repository.query.Param;
 import ru.itis.raslgab.gowork.dto.RoomDetailsDto;
+import ru.itis.raslgab.gowork.dto.PopularRoomDto;
 import ru.itis.raslgab.gowork.dto.RoomCatalogItemDto;
 import ru.itis.raslgab.gowork.dto.RoomOptionDto;
 import ru.itis.raslgab.gowork.dto.SimilarRoomDto;
@@ -143,4 +144,25 @@ public interface RoomRepo extends JpaRepository<Room, Long> {
                                           @Param("cityId") Long cityId,
                                           @Param("peopleCapacity") Integer peopleCapacity,
                                           @Param("organizationStatus") OrganizationStatus organizationStatus);
+
+    @Query("""
+            select new ru.itis.raslgab.gowork.dto.PopularRoomDto(
+                r.id,
+                r.name,
+                o.name,
+                coalesce(c.name, 'Город не указан'),
+                r.peopleCapacity,
+                r.pricePerHour,
+                count(b.id)
+            )
+            from Room r
+            join r.organization o
+            left join o.city c
+            left join r.bookings b
+            where o.status = :organizationStatus
+            group by r.id, r.name, o.name, c.name, r.peopleCapacity, r.pricePerHour
+            order by count(b.id) desc, r.name
+            """)
+    List<PopularRoomDto> findPopularRooms(@Param("organizationStatus") OrganizationStatus organizationStatus,
+                                          Pageable pageable);
 }

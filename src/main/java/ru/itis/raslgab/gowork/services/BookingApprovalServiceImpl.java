@@ -145,7 +145,7 @@ public class BookingApprovalServiceImpl implements BookingApprovalService {
         try {
             return qrCodeService.generateBookingQr(dto);
         } catch (Exception e) {
-            log.error("Failed to generate QR for bookingId={}", dto.getBookingId(), e);
+            log.warn("Failed to generate QR for bookingId={}: {}", dto.getBookingId(), e.getMessage());
             return new byte[0];
         }
     }

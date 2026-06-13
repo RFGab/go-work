@@ -67,5 +67,6 @@ public class RoomController {
     private void addCreatePageAttributes(Long organizationId, Model model) {
         model.addAttribute("organizationId", organizationId);
         model.addAttribute("statuses", roomService.getCreateStatuses());
+        model.addAttribute("options", roomService.getAllOptions());
     }
 }

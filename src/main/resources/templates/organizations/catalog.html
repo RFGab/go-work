@@ -14,17 +14,21 @@
         <a th:href="@{/organizations/new}" class="btn btn-outline-primary">Создать организацию</a>
     </div>
 
-    <form th:action="@{/organizations}" method="get" class="row g-2 align-items-end mb-4">
-        <div class="col-md-5">
+    <form th:action="@{/organizations}" th:object="${filter}" method="get" class="row g-2 align-items-end mb-4">
+        <div class="col-md-4">
+            <label for="name" class="form-label">Название</label>
+            <input id="name" type="text" class="form-control" th:field="*{name}" placeholder="Название организации">
+        </div>
+        <div class="col-md-4">
             <label for="cityId" class="form-label">Город</label>
-            <select id="cityId" name="cityId" class="form-select">
+            <select id="cityId" class="form-select" th:field="*{cityId}">
                 <option value="">Все города</option>
                 <option th:each="city : ${cities}"
                         th:value="${city.id}"
-                        th:text="${city.name}"
-                        th:selected="${city.id == selectedCityId}">Город</option>
+                        th:text="${city.name}">Город</option>
             </select>
         </div>
+        <input type="hidden" th:field="*{size}">
         <div class="col-auto">
             <button type="submit" class="btn btn-primary">Показать</button>
         </div>
@@ -72,6 +76,26 @@
             </article>
         </div>
     </div>
+
+    <nav th:if="${organizationsPage.totalPages > 1}" class="mt-4" aria-label="Навигация по страницам организаций">
+        <ul class="pagination justify-content-center">
+            <li class="page-item" th:classappend="${organizationsPage.first} ? 'disabled'">
+                <a class="page-link"
+                   th:href="@{/organizations(cityId=${filter.cityId},name=${filter.name},size=${filter.size},page=${organizationsPage.number - 1})}">Назад</a>
+            </li>
+            <li th:each="pageNumber : ${pageNumbers}"
+                class="page-item"
+                th:classappend="${pageNumber == organizationsPage.number} ? 'active'">
+                <a class="page-link"
+                   th:href="@{/organizations(cityId=${filter.cityId},name=${filter.name},size=${filter.size},page=${pageNumber})}"
+                   th:text="${pageNumber + 1}">1</a>
+            </li>
+            <li class="page-item" th:classappend="${organizationsPage.last} ? 'disabled'">
+                <a class="page-link"
+                   th:href="@{/organizations(cityId=${filter.cityId},name=${filter.name},size=${filter.size},page=${organizationsPage.number + 1})}">Вперед</a>
+            </li>
+        </ul>
+    </nav>
 </main>
 </body>
 </html>

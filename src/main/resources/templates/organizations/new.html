@@ -21,9 +21,14 @@
                 </div>
 
                 <div>
-                    <label for="cityName" class="form-label">Город</label>
-                    <input id="cityName" type="text" class="form-control" th:field="*{cityName}">
-                    <div class="text-danger small" th:if="${#fields.hasErrors('cityName')}" th:errors="*{cityName}"></div>
+                    <label for="cityId" class="form-label">Город</label>
+                    <select id="cityId" class="form-select" th:field="*{cityId}">
+                        <option value="">Выберите город</option>
+                        <option th:each="city : ${cities}"
+                                th:value="${city.id}"
+                                th:text="${city.name}">Город</option>
+                    </select>
+                    <div class="text-danger small" th:if="${#fields.hasErrors('cityId')}" th:errors="*{cityId}"></div>
                 </div>
 
                 <div>

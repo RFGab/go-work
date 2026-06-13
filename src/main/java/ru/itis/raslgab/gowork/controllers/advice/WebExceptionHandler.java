@@ -54,7 +54,7 @@ public class WebExceptionHandler {
         ModelAndView modelAndView = new ModelAndView("error/error");
         modelAndView.setStatus(status);
         modelAndView.addObject("status", status.value());
-        modelAndView.addObject("title", title);
+        modelAndView.addObject("errorTitle", title);
         modelAndView.addObject("message", message);
         modelAndView.addObject("path", path);
         return modelAndView;

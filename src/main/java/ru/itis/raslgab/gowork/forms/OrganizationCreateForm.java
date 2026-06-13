@@ -2,6 +2,7 @@ package ru.itis.raslgab.gowork.forms;
 
 import jakarta.validation.constraints.Email;
 import jakarta.validation.constraints.NotBlank;
+import jakarta.validation.constraints.NotNull;
 import jakarta.validation.constraints.Size;
 import lombok.AllArgsConstructor;
 import lombok.Builder;
@@ -20,8 +21,8 @@ public class OrganizationCreateForm {
     @Size(max = 1000, message = "Описание должно быть не длиннее 1000 символов")
     private String description;
 
-    @NotBlank(message = "Город обязателен")
-    private String cityName;
+    @NotNull(message = "Выберите город")
+    private Long cityId;
 
     private String yandexMapLink;
 

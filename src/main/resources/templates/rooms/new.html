@@ -52,6 +52,30 @@
                     <div class="text-danger small" th:if="${#fields.hasErrors('status')}" th:errors="*{status}"></div>
                 </div>
 
+                <div>
+                    <label class="form-label">Опции комнаты</label>
+                    <div th:if="${#lists.isEmpty(options)}" class="text-muted small border rounded p-3">
+                        Опций пока нет. Их можно добавить в админке.
+                    </div>
+                    <div th:if="${!#lists.isEmpty(options)}" class="border rounded p-3">
+                        <div class="row g-2">
+                            <div th:each="option : ${options}" class="col-md-6">
+                                <label class="form-check">
+                                    <input type="checkbox"
+                                           class="form-check-input"
+                                           th:field="*{optionIds}"
+                                           th:value="${option.id}">
+                                    <span class="form-check-label">
+                                        <span th:text="${option.name}">Опция</span>
+                                        <span class="text-muted small" th:text="' · ' + ${option.category}"> · CATEGORY</span>
+                                    </span>
+                                </label>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="form-text">Выберите оборудование и удобства, которые есть в комнате.</div>
+                </div>
+
                 <div class="d-flex gap-2">
                     <button type="submit" class="btn btn-primary">Создать комнату</button>
                     <a th:href="@{/organizations/{id}(id=${organizationId})}" class="btn btn-outline-secondary">Отмена</a>

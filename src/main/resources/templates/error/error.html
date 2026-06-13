@@ -8,7 +8,7 @@
 <main>
     <section class="text-center py-5">
         <div class="display-4 fw-bold mb-3" th:text="${status}">500</div>
-        <h1 class="h3 mb-3" th:text="${title}">Ошибка</h1>
+        <h1 class="h3 mb-3" th:text="${errorTitle}">Ошибка</h1>
         <p class="text-muted mb-4" th:text="${message}">Что-то пошло не так.</p>
         <div class="text-muted small mb-4" th:if="${path}" th:text="'Путь: ' + ${path}">Путь</div>
         <a th:href="@{/}" class="btn btn-primary">На главную</a>

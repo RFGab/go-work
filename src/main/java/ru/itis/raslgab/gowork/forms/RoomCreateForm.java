@@ -12,6 +12,7 @@ import lombok.NoArgsConstructor;
 import ru.itis.raslgab.gowork.models.enums.RoomStatus;
 
 import java.math.BigDecimal;
+import java.util.List;
 
 @Data
 @Builder
@@ -35,4 +36,6 @@ public class RoomCreateForm {
 
     @NotNull(message = "Выберите статус")
     private RoomStatus status;
+
+    private List<Long> optionIds;
 }

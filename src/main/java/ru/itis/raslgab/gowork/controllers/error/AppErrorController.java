@@ -34,13 +34,13 @@ public class AppErrorController implements ErrorController {
         model.addAttribute("path", path);
 
         if (safeStatus == 403) {
-            model.addAttribute("title", "Доступ запрещен");
+            model.addAttribute("errorTitle", "Доступ запрещен");
             model.addAttribute("message", "У вас нет прав для просмотра этой страницы.");
         } else if (safeStatus == 404) {
-            model.addAttribute("title", "Страница не найдена");
+            model.addAttribute("errorTitle", "Страница не найдена");
             model.addAttribute("message", "Такой страницы нет или она была перемещена.");
         } else {
-            model.addAttribute("title", "Ошибка сервера");
+            model.addAttribute("errorTitle", "Ошибка сервера");
             model.addAttribute("message", "Мы уже знаем, что что-то пошло не так.");
         }
 

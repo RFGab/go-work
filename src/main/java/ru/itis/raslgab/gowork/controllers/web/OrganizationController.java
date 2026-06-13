@@ -2,6 +2,7 @@ package ru.itis.raslgab.gowork.controllers.web;
 
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
+import org.springframework.data.domain.Page;
 import org.springframework.security.core.annotation.AuthenticationPrincipal;
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
@@ -15,6 +16,7 @@ import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.multipart.MultipartFile;
 import org.springframework.web.servlet.mvc.support.RedirectAttributes;
 import ru.itis.raslgab.gowork.dto.OrganizationDetailsDto;
+import ru.itis.raslgab.gowork.forms.OrganizationCatalogFilterForm;
 import ru.itis.raslgab.gowork.forms.OrganizationCreateForm;
 import ru.itis.raslgab.gowork.forms.OrganizationUpdateForm;
 import ru.itis.raslgab.gowork.forms.ReviewForm;
@@ -23,6 +25,8 @@ import ru.itis.raslgab.gowork.security.UserDetailsImpl;
 import ru.itis.raslgab.gowork.services.OrganizationService;
 import ru.itis.raslgab.gowork.services.ReviewService;
 import ru.itis.raslgab.gowork.services.UserActionLogService;
+
+import java.util.List;
 
 @Controller
 @RequestMapping("/organizations")
@@ -34,12 +38,14 @@ public class OrganizationController {
 
     @GetMapping
     public String catalog(@AuthenticationPrincipal UserDetailsImpl userDetails,
-                          @RequestParam(required = false) Long cityId,
+                          @ModelAttribute("filter") OrganizationCatalogFilterForm filter,
                           Model model) {
-        model.addAttribute("organizations", organizationService.getCatalog(cityId));
+        Page<?> organizationsPage = organizationService.getCatalog(filter);
+        model.addAttribute("organizationsPage", organizationsPage);
+        model.addAttribute("organizations", organizationsPage.getContent());
         model.addAttribute("cities", organizationService.getCityOptions());
-        model.addAttribute("selectedCityId", cityId);
-        userActionLogService.log(userDetails.getUserId(), "ORGANIZATION_CATALOG_OPEN", "cityId=" + cityId);
+        model.addAttribute("pageNumbers", getPageNumbers(organizationsPage));
+        userActionLogService.log(userDetails.getUserId(), "ORGANIZATION_CATALOG_OPEN", "cityId=" + filter.getCityId() + ", name=" + filter.getName());
         return "organizations/catalog";
     }
 
@@ -49,6 +55,7 @@ public class OrganizationController {
         if (!model.containsAttribute("organizationForm")) {
             model.addAttribute("organizationForm", OrganizationCreateForm.builder().build());
         }
+        model.addAttribute("cities", organizationService.getCityOptions());
         return "organizations/new";
     }
 
@@ -56,11 +63,13 @@ public class OrganizationController {
     public String create(@AuthenticationPrincipal UserDetailsImpl userDetails,
                          @Valid @ModelAttribute("organizationForm") OrganizationCreateForm form,
                          BindingResult bindingResult,
+                         Model model,
                          RedirectAttributes redirectAttributes) {
         Long userId = userDetails.getUserId();
 
         if (bindingResult.hasErrors()) {
             userActionLogService.log(userId, "ORGANIZATION_CREATE_FAILED", "Validation errors");
+            model.addAttribute("cities", organizationService.getCityOptions());
             return "organizations/new";
         }
 
@@ -164,5 +173,11 @@ public class OrganizationController {
         if (organization.isOwner() && !model.containsAttribute("organizationForm")) {
             model.addAttribute("organizationForm", organizationService.getUpdateForm(organizationId, userDetails.getUserId()));
         }
+    }
+
+    private List<Integer> getPageNumbers(Page<?> page) {
+        return java.util.stream.IntStream.range(0, page.getTotalPages())
+                .boxed()
+                .toList();
     }
 }

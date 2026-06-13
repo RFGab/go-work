@@ -15,7 +15,7 @@
                 <span th:text="'Владелец: ' + ${organization.ownerFullName}">Владелец</span>
             </div>
         </div>
-        <span class="badge text-bg-secondary fs-6" th:text="${organization.status}">ACTIVE</span>
+        <span id="organizationStatusBadge" class="badge text-bg-secondary fs-6" th:text="${organization.status}">ACTIVE</span>
     </div>
 
     <div th:if="${successMessage}" class="alert alert-success" th:text="${successMessage}"></div>
@@ -125,7 +125,9 @@
             <div th:if="${organization.owner or organization.admin}" class="border rounded p-3 mb-4">
                 <h2 class="h5 mb-3">Управление</h2>
 
-                <form th:action="@{/organizations/{id}/status(id=${organization.id})}" method="post" class="row g-2 align-items-end mb-3">
+                <div id="statusMessage" class="alert d-none"></div>
+
+                <form th:action="@{/api/status/organizations/{id}(id=${organization.id})}" method="post" class="row g-2 align-items-end mb-3 status-form">
                     <div class="col">
                         <label for="status" class="form-label">Статус</label>
                         <select id="status" name="status" class="form-select">
@@ -265,11 +267,37 @@
         const csrfToken = document.querySelector('meta[name="_csrf"]').content;
         const csrfHeader = document.querySelector('meta[name="_csrf_header"]').content;
         const reviewMessage = document.getElementById('reviewMessage');
+        const statusMessage = document.getElementById('statusMessage');
+        const organizationStatusBadge = document.getElementById('organizationStatusBadge');
 
         function showReviewMessage(success, text) {
             reviewMessage.className = success ? 'alert alert-success' : 'alert alert-danger';
             reviewMessage.textContent = text;
         }
+
+        function showStatusMessage(success, text) {
+            if (!statusMessage) {
+                return;
+            }
+            statusMessage.className = success ? 'alert alert-success' : 'alert alert-danger';
+            statusMessage.textContent = text;
+        }
+
+        document.querySelectorAll('.status-form').forEach(form => {
+            form.addEventListener('submit', async event => {
+                event.preventDefault();
+                const response = await fetch(form.action, {
+                    method: 'POST',
+                    headers: {[csrfHeader]: csrfToken},
+                    body: new FormData(form)
+                });
+                const data = await response.json();
+                showStatusMessage(data.success, data.message);
+                if (data.success && organizationStatusBadge) {
+                    organizationStatusBadge.textContent = form.querySelector('[name="status"]').value;
+                }
+            });
+        });
 
         document.querySelectorAll('.review-form').forEach(form => {
             form.addEventListener('submit', async event => {

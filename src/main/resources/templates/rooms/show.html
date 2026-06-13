@@ -17,7 +17,7 @@
                 <span th:text="${room.cityName}">Город</span>
             </div>
         </div>
-        <span class="badge text-bg-secondary fs-6" th:text="${room.status}">AVAILABLE</span>
+        <span id="roomStatusBadge" class="badge text-bg-secondary fs-6" th:text="${room.status}">AVAILABLE</span>
     </div>
 
     <div th:if="${successMessage}" class="alert alert-success" th:text="${successMessage}"></div>
@@ -68,12 +68,16 @@
 
             <section class="mt-4">
                 <h2 class="h4 mb-3">Опции</h2>
-                <div th:if="${#lists.isEmpty(options)}" class="text-muted">У комнаты пока нет указанных опций.</div>
-                <div class="d-flex flex-wrap gap-2">
-                    <span th:each="option : ${options}" class="badge text-bg-light border">
-                        <span th:text="${option.name}">Опция</span>
-                        <span class="text-muted" th:text="' · ' + ${option.category}"> · CATEGORY</span>
-                    </span>
+                <div th:if="${#lists.isEmpty(options)}" class="text-muted border rounded p-3">
+                    У комнаты пока нет указанных опций.
+                </div>
+                <div th:if="${!#lists.isEmpty(options)}" class="row g-2">
+                    <div th:each="option : ${options}" class="col-md-6">
+                        <div class="border rounded p-2 h-100">
+                            <div class="fw-semibold" th:text="${option.name}">Опция</div>
+                            <div class="text-muted small" th:text="${option.category}">CATEGORY</div>
+                        </div>
+                    </div>
                 </div>
             </section>
 
@@ -158,6 +162,27 @@
 
         <aside class="col-lg-4">
             <div th:if="${canManageRoom}" class="border rounded p-3 mb-3">
+                <h2 class="h5 mb-3">Статус комнаты</h2>
+                <div id="roomStatusMessage" class="alert d-none"></div>
+                <form th:action="@{/api/status/rooms/{id}(id=${room.id})}"
+                      method="post"
+                      class="row g-2 align-items-end room-status-form">
+                    <div class="col">
+                        <label for="roomStatus" class="form-label">Статус</label>
+                        <select id="roomStatus" name="status" class="form-select">
+                            <option th:each="status : ${roomStatuses}"
+                                    th:value="${status}"
+                                    th:text="${status}"
+                                    th:selected="${status == room.status}">AVAILABLE</option>
+                        </select>
+                    </div>
+                    <div class="col-auto">
+                        <button type="submit" class="btn btn-outline-primary">Изменить</button>
+                    </div>
+                </form>
+            </div>
+
+            <div th:if="${canManageRoom}" class="border rounded p-3 mb-3">
                 <h2 class="h5 mb-3">Фото комнаты</h2>
                 <form th:action="@{/rooms/{id}/images(id=${room.id})}"
                       method="post"
@@ -207,6 +232,30 @@
             </div>
         </aside>
     </div>
+
+    <script>
+        const csrfToken = document.querySelector('meta[name="_csrf"]').content;
+        const csrfHeader = document.querySelector('meta[name="_csrf_header"]').content;
+        const roomStatusMessage = document.getElementById('roomStatusMessage');
+        const roomStatusBadge = document.getElementById('roomStatusBadge');
+
+        document.querySelectorAll('.room-status-form').forEach(form => {
+            form.addEventListener('submit', async event => {
+                event.preventDefault();
+                const response = await fetch(form.action, {
+                    method: 'POST',
+                    headers: {[csrfHeader]: csrfToken},
+                    body: new FormData(form)
+                });
+                const data = await response.json();
+                roomStatusMessage.className = data.success ? 'alert alert-success' : 'alert alert-danger';
+                roomStatusMessage.textContent = data.message;
+                if (data.success) {
+                    roomStatusBadge.textContent = form.querySelector('[name="status"]').value;
+                }
+            });
+        });
+    </script>
 </main>
 </body>
 </html>

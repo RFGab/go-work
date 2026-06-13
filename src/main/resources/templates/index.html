@@ -16,7 +16,7 @@
         <!-- Простая форма поиска (будет работать через классический GET-запрос) -->
         <form th:action="@{/rooms}" method="get" class="row justify-content-center g-2 mb-4">
             <div class="col-auto">
-                <input type="number" name="capacity" class="form-control" placeholder="Вместимость" min="1" aria-label="Вместимость">
+                <input type="number" name="minCapacity" class="form-control" placeholder="Вместимость" min="1" aria-label="Вместимость">
             </div>
             <div class="col-auto">
                 <button type="submit" class="btn btn-primary">Найти</button>
@@ -24,18 +24,32 @@
         </form>
     </section>
 
-    <!-- Блок "Популярные комнаты" (заглушка, данные подтянем позже) -->
     <section class="mb-5">
         <h2 class="h4 mb-3">Популярные комнаты</h2>
+        <div th:if="${#lists.isEmpty(popularRooms)}" class="alert alert-light border">
+            Пока нет комнат с бронями.
+        </div>
         <div class="row g-3">
-            <!-- Карточка-заглушка (3 шт., как в ТЗ: "3 похожие комнаты") -->
-            <div class="col-md-4" th:each="i : ${#numbers.sequence(1, 3)}">
+            <div class="col-md-4" th:each="room : ${popularRooms}">
                 <div class="card h-100 border-0 shadow-sm">
                     <div class="card-body">
-                        <h5 class="card-title">Переговорная #<th:block th:text="${i}"/></h5>
-                        <p class="card-text text-muted small">Центр города • до 10 человек</p>
-                        <p class="card-text fw-bold">от 500 ₽/час</p>
-                        <a th:href="@{/rooms/{id}(id=${i})}" class="btn btn-outline-primary btn-sm">Подробнее</a>
+                        <h5 class="card-title" th:text="${room.name}">Комната</h5>
+                        <p class="card-text text-muted small">
+                            <span th:text="${room.organizationName}">Организация</span>
+                            <span> · </span>
+                            <span th:text="${room.cityName}">Город</span>
+                        </p>
+                        <p class="card-text small">
+                            <span th:text="${room.peopleCapacity}">0</span>
+                            <span> мест · </span>
+                            <span th:text="${room.bookingCount}">0</span>
+                            <span> броней</span>
+                        </p>
+                        <p class="card-text fw-bold">
+                            <span th:text="${room.pricePerHour}">0.00</span>
+                            <span> ₽/час</span>
+                        </p>
+                        <a th:href="@{/rooms/{id}(id=${room.id})}" class="btn btn-outline-primary btn-sm">Подробнее</a>
                     </div>
                 </div>
             </div>

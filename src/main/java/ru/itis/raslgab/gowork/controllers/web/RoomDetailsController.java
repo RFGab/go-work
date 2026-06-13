@@ -16,6 +16,7 @@ import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.multipart.MultipartFile;
 import org.springframework.web.servlet.mvc.support.RedirectAttributes;
 import ru.itis.raslgab.gowork.forms.BookingCreateForm;
+import ru.itis.raslgab.gowork.models.enums.RoomStatus;
 import ru.itis.raslgab.gowork.security.UserDetailsImpl;
 import ru.itis.raslgab.gowork.services.BookingService;
 import ru.itis.raslgab.gowork.services.RoomService;
@@ -102,5 +103,6 @@ public class RoomDetailsController {
         model.addAttribute("options", roomService.getOptions(roomId));
         model.addAttribute("similarRooms", roomService.getSimilarRooms(roomId));
         model.addAttribute("canManageRoom", roomService.canManageRoom(roomId, userDetails.getUserId(), userDetails.getUser().getRole()));
+        model.addAttribute("roomStatuses", RoomStatus.values());
     }
 }

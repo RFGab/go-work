@@ -9,7 +9,7 @@
     <div class="d-flex justify-content-between align-items-center mb-4">
         <div>
             <h1 class="h3 mb-1" th:text="${adminPage.title}">Раздел</h1>
-            <a th:href="@{/admin}" class="small">Назад в дашборд</a>
+            <a th:href="@{/admin}" class="btn btn-outline-secondary btn-sm mt-2">Назад в дашборд</a>
         </div>
         <div class="text-muted small">
             Всего: <span th:text="${adminPage.rows.totalElements}">0</span>
