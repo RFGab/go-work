@@ -17,7 +17,7 @@
                 <span th:text="${room.cityName}">Город</span>
             </div>
         </div>
-        <span id="roomStatusBadge" class="badge text-bg-secondary fs-6" th:text="${room.status}">AVAILABLE</span>
+        <span id="roomStatusBadge" class="badge text-bg-secondary fs-6" th:text="${room.status.displayName}">Доступна</span>
     </div>
 
     <div th:if="${successMessage}" class="alert alert-success" th:text="${successMessage}"></div>
@@ -26,17 +26,31 @@
         <section class="col-lg-8">
             <section class="mb-4">
                 <h2 class="h4 mb-3">Фото комнаты</h2>
+                <div id="roomImageMessage" class="alert d-none"></div>
+
                 <div th:if="${#lists.isEmpty(room.imageFileNames)}"
                      class="border rounded bg-light text-muted d-flex align-items-center justify-content-center"
                      style="height: 180px;">
                     Фото пока не загружены
                 </div>
+
                 <div th:if="${!#lists.isEmpty(room.imageFileNames)}" class="row g-2">
-                    <div th:each="imageFileName : ${room.imageFileNames}" class="col-md-6">
-                        <img th:src="@{/img/{fileName}(fileName=${imageFileName})}"
-                             alt="Фото комнаты"
-                             class="img-fluid rounded border w-100"
-                             style="height: 220px; object-fit: cover;">
+                    <div th:each="imageFileName : ${room.imageFileNames}"
+                         th:id="'room-image-' + ${imageFileName}"
+                         class="col-md-6">
+                        <div class="position-relative">
+                            <img th:src="@{/img/{fileName}(fileName=${imageFileName})}"
+                                 alt="Фото комнаты"
+                                 class="img-fluid rounded border w-100"
+                                 style="height: 220px; object-fit: cover;">
+                            <button th:if="${canManageRoom}"
+                                    type="button"
+                                    class="btn btn-sm btn-danger position-absolute top-0 end-0 m-2 room-image-delete"
+                                    th:data-url="@{/api/rooms/{id}/images/{fileName}(id=${room.id},fileName=${imageFileName})}"
+                                    th:data-image-id="'room-image-' + ${imageFileName}">
+                                Удалить
+                            </button>
+                        </div>
                     </div>
                 </div>
             </section>
@@ -83,7 +97,7 @@
                     <div th:each="option : ${options}" class="col-md-6">
                         <div class="border rounded p-2 h-100">
                             <div class="fw-semibold" th:text="${option.name}">Опция</div>
-                            <div class="text-muted small" th:text="${option.category}">CATEGORY</div>
+                            <div class="text-muted small" th:text="${option.category}">Категория</div>
                         </div>
                     </div>
                 </div>
@@ -170,6 +184,80 @@
 
         <aside class="col-lg-4">
             <div th:if="${canManageRoom}" class="border rounded p-3 mb-3">
+                <h2 class="h5 mb-3">Редактирование комнаты</h2>
+                <form th:action="@{/rooms/{id}(id=${room.id})}"
+                      th:object="${roomForm}"
+                      method="post"
+                      class="vstack gap-3">
+                    <div th:if="${#fields.hasGlobalErrors()}" class="alert alert-danger">
+                        <div th:each="err : ${#fields.globalErrors()}" th:text="${err}">Ошибка</div>
+                    </div>
+
+                    <div>
+                        <label for="roomName" class="form-label">Название</label>
+                        <input id="roomName" type="text" class="form-control" th:field="*{name}">
+                        <div class="text-danger small" th:if="${#fields.hasErrors('name')}" th:errors="*{name}"></div>
+                    </div>
+
+                    <div>
+                        <label for="roomDescription" class="form-label">Описание</label>
+                        <textarea id="roomDescription" rows="3" class="form-control" th:field="*{description}"></textarea>
+                        <div class="text-danger small" th:if="${#fields.hasErrors('description')}" th:errors="*{description}"></div>
+                    </div>
+
+                    <div class="row g-2">
+                        <div class="col-6">
+                            <label for="peopleCapacity" class="form-label">Вместимость</label>
+                            <input id="peopleCapacity" type="number" min="1" class="form-control" th:field="*{peopleCapacity}">
+                            <div class="text-danger small" th:if="${#fields.hasErrors('peopleCapacity')}" th:errors="*{peopleCapacity}"></div>
+                        </div>
+                        <div class="col-6">
+                            <label for="pricePerHour" class="form-label">Цена</label>
+                            <input id="pricePerHour" type="number" min="0.01" step="0.01" class="form-control" th:field="*{pricePerHour}">
+                            <div class="text-danger small" th:if="${#fields.hasErrors('pricePerHour')}" th:errors="*{pricePerHour}"></div>
+                        </div>
+                    </div>
+
+                    <div class="row g-2">
+                        <div class="col-6">
+                            <label for="dayStart" class="form-label">Начало дня</label>
+                            <input id="dayStart" type="number" min="0" max="24" class="form-control" th:field="*{dayStart}">
+                            <div class="text-danger small" th:if="${#fields.hasErrors('dayStart')}" th:errors="*{dayStart}"></div>
+                        </div>
+                        <div class="col-6">
+                            <label for="dayEnd" class="form-label">Конец дня</label>
+                            <input id="dayEnd" type="number" min="0" max="24" class="form-control" th:field="*{dayEnd}">
+                            <div class="text-danger small" th:if="${#fields.hasErrors('dayEnd')}" th:errors="*{dayEnd}"></div>
+                        </div>
+                    </div>
+
+                    <div>
+                        <div class="form-label">Опции</div>
+                        <div th:if="${#lists.isEmpty(allOptions)}" class="text-muted small">
+                            Опций пока нет. Их можно добавить в админке.
+                        </div>
+                        <div th:if="${!#lists.isEmpty(allOptions)}" class="border rounded p-2">
+                            <div th:each="option : ${allOptions}" class="form-check">
+                                <input class="form-check-input"
+                                       type="checkbox"
+                                       name="optionIds"
+                                       th:id="'roomOption-' + ${option.id}"
+                                       th:value="${option.id}"
+                                       th:checked="${roomForm.optionIds != null and #lists.contains(roomForm.optionIds, option.id)}">
+                                <label class="form-check-label"
+                                       th:for="'roomOption-' + ${option.id}">
+                                    <span th:text="${option.name}">Опция</span>
+                                    <span class="text-muted small" th:text="' · ' + ${option.category}">Категория</span>
+                                </label>
+                            </div>
+                        </div>
+                    </div>
+
+                    <button type="submit" class="btn btn-primary">Сохранить комнату</button>
+                </form>
+            </div>
+
+            <div th:if="${canManageRoom}" class="border rounded p-3 mb-3">
                 <h2 class="h5 mb-3">Статус комнаты</h2>
                 <div id="roomStatusMessage" class="alert d-none"></div>
                 <form th:action="@{/api/status/rooms/{id}(id=${room.id})}"
@@ -180,8 +268,8 @@
                         <select id="roomStatus" name="status" class="form-select">
                             <option th:each="status : ${roomStatuses}"
                                     th:value="${status}"
-                                    th:text="${status}"
-                                    th:selected="${status == room.status}">AVAILABLE</option>
+                                    th:text="${status.displayName}"
+                                    th:selected="${status == room.status}">Доступна</option>
                         </select>
                     </div>
                     <div class="col-auto">
@@ -191,7 +279,7 @@
             </div>
 
             <div th:if="${canManageRoom}" class="border rounded p-3 mb-3">
-                <h2 class="h5 mb-3">Фото комнаты</h2>
+                <h2 class="h5 mb-3">Добавить фото</h2>
                 <form th:action="@{/rooms/{id}/images(id=${room.id})}"
                       method="post"
                       enctype="multipart/form-data"
@@ -246,6 +334,12 @@
         const csrfHeader = document.querySelector('meta[name="_csrf_header"]').content;
         const roomStatusMessage = document.getElementById('roomStatusMessage');
         const roomStatusBadge = document.getElementById('roomStatusBadge');
+        const roomImageMessage = document.getElementById('roomImageMessage');
+
+        function showRoomImageMessage(success, text) {
+            roomImageMessage.className = success ? 'alert alert-success' : 'alert alert-danger';
+            roomImageMessage.textContent = text;
+        }
 
         document.querySelectorAll('.room-status-form').forEach(form => {
             form.addEventListener('submit', async event => {
@@ -259,7 +353,25 @@
                 roomStatusMessage.className = data.success ? 'alert alert-success' : 'alert alert-danger';
                 roomStatusMessage.textContent = data.message;
                 if (data.success) {
-                    roomStatusBadge.textContent = form.querySelector('[name="status"]').value;
+                    const selected = form.querySelector('[name="status"]').selectedOptions[0];
+                    roomStatusBadge.textContent = selected.textContent;
+                }
+            });
+        });
+
+        document.querySelectorAll('.room-image-delete').forEach(button => {
+            button.addEventListener('click', async () => {
+                if (!confirm('Удалить это фото комнаты?')) {
+                    return;
+                }
+                const response = await fetch(button.dataset.url, {
+                    method: 'DELETE',
+                    headers: {[csrfHeader]: csrfToken}
+                });
+                const data = await response.json();
+                showRoomImageMessage(data.success, data.message);
+                if (data.success) {
+                    document.getElementById(button.dataset.imageId).remove();
                 }
             });
         });

@@ -9,4 +9,6 @@ public interface BookingService {
     Long createBookingRequest(Long roomId, Long renterId, BookingCreateForm form);
 
     List<BookingListItemDto> getUserBookings(Long renterId);
+
+    void cancelBooking(Long bookingId);
 }

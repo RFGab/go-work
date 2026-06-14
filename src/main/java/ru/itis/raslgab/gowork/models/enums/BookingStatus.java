@@ -1,10 +1,16 @@
 package ru.itis.raslgab.gowork.models.enums;
 
-// для статуса брони
+import lombok.Getter;
+import lombok.RequiredArgsConstructor;
+
+@Getter
+@RequiredArgsConstructor
 public enum BookingStatus {
-    PENDING, // бронь ожидает подтверждения
-    CONFIRMED, // бронь подтверждена
-    CANCELLED, // отменена
-    REJECTED,
-    COMPLETED,
+    PENDING("Ожидает подтверждения"),
+    CONFIRMED("Подтверждена"),
+    CANCELLED("Отменена"),
+    REJECTED("Отклонена"),
+    COMPLETED("Завершена");
+
+    private final String displayName;
 }

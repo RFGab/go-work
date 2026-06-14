@@ -1,8 +1,14 @@
 package ru.itis.raslgab.gowork.models.enums;
 
-// для статуса организации
+import lombok.Getter;
+import lombok.RequiredArgsConstructor;
+
+@Getter
+@RequiredArgsConstructor
 public enum OrganizationStatus {
-    ACTIVE,
-    FREEZE,
-    BLOCKED
+    ACTIVE("Активна"),
+    FREEZE("Заморожена"),
+    BLOCKED("Заблокирована");
+
+    private final String displayName;
 }

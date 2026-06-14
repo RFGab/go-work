@@ -453,8 +453,17 @@ public class AdminServiceImpl implements AdminService {
 
     private <E extends Enum<E>> List<AdminOptionDto> enumOptions(E[] values) {
         return java.util.Arrays.stream(values)
-                .map(value -> AdminOptionDto.builder().value(value.name()).label(value.name()).build())
+                .map(value -> AdminOptionDto.builder().value(value.name()).label(enumLabel(value)).build())
                 .toList();
+    }
+
+    private String enumLabel(Enum<?> value) {
+        try {
+            Object displayName = value.getClass().getMethod("getDisplayName").invoke(value);
+            return displayName == null ? value.name() : displayName.toString();
+        } catch (Exception e) {
+            return value.name();
+        }
     }
 
     private User findUser(Long id) {

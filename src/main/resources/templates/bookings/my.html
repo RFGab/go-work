@@ -14,6 +14,8 @@
         <a th:href="@{/rooms}" class="btn btn-outline-primary">Найти комнату</a>
     </div>
 
+    <div id="bookingMessage" class="alert d-none"></div>
+
     <div th:if="${#lists.isEmpty(bookings)}" class="alert alert-light border">
         У вас пока нет броней. Откройте каталог комнат и отправьте первую заявку.
     </div>
@@ -29,10 +31,11 @@
                 <th>Людей</th>
                 <th>Статус</th>
                 <th>Комментарий</th>
+                <th>Действия</th>
             </tr>
             </thead>
             <tbody>
-            <tr th:each="booking : ${bookings}">
+            <tr th:each="booking : ${bookings}" th:id="'booking-row-' + ${booking.id}">
                 <td th:text="${booking.id}">1</td>
                 <td>
                     <a th:href="@{/rooms/{id}(id=${booking.roomId})}"
@@ -55,18 +58,63 @@
                 </td>
                 <td th:text="${booking.numOfPeople ?: '-'}">2</td>
                 <td>
-                    <span class="badge"
+                    <span class="badge booking-status"
                           th:classappend="${booking.status.name() == 'CONFIRMED'} ? ' text-bg-success' :
                             (${booking.status.name() == 'PENDING'} ? ' text-bg-warning' :
                             (${booking.status.name() == 'REJECTED'} ? ' text-bg-danger' :
                             (${booking.status.name() == 'CANCELLED'} ? ' text-bg-secondary' : ' text-bg-light text-dark')))"
-                          th:text="${booking.status}">PENDING</span>
+                          th:text="${booking.status.displayName}">Ожидает подтверждения</span>
                 </td>
                 <td th:text="${booking.comment ?: '-'}">Комментарий</td>
+                <td>
+                    <button th:if="${booking.status.name() == 'PENDING' or booking.status.name() == 'CONFIRMED'}"
+                            type="button"
+                            class="btn btn-sm btn-outline-danger booking-cancel"
+                            th:data-url="@{/api/bookings/{id}/cancel(id=${booking.id})}"
+                            th:data-booking-id="${booking.id}">
+                        Отменить
+                    </button>
+                    <span th:unless="${booking.status.name() == 'PENDING' or booking.status.name() == 'CONFIRMED'}"
+                          class="text-muted small">Нет действий</span>
+                </td>
             </tr>
             </tbody>
         </table>
     </div>
+
+    <script>
+        const csrfToken = document.querySelector('meta[name="_csrf"]').content;
+        const csrfHeader = document.querySelector('meta[name="_csrf_header"]').content;
+        const bookingMessage = document.getElementById('bookingMessage');
+
+        function showBookingMessage(success, text) {
+            bookingMessage.className = success ? 'alert alert-success' : 'alert alert-danger';
+            bookingMessage.textContent = text;
+        }
+
+        document.querySelectorAll('.booking-cancel').forEach(button => {
+            button.addEventListener('click', async () => {
+                if (!confirm('Отменить эту бронь?')) {
+                    return;
+                }
+                const response = await fetch(button.dataset.url, {
+                    method: 'POST',
+                    headers: {[csrfHeader]: csrfToken}
+                });
+                const data = await response.json();
+                showBookingMessage(data.success, data.message);
+                if (data.success) {
+                    const row = document.getElementById(`booking-row-${button.dataset.bookingId}`);
+                    row.querySelector('.booking-status').className = 'badge booking-status text-bg-secondary';
+                    row.querySelector('.booking-status').textContent = 'Отменена';
+                    button.replaceWith(Object.assign(document.createElement('span'), {
+                        className: 'text-muted small',
+                        textContent: 'Нет действий'
+                    }));
+                }
+            });
+        });
+    </script>
 </main>
 </body>
 </html>

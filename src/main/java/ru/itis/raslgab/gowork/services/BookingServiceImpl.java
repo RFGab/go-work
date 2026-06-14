@@ -1,9 +1,11 @@
 package ru.itis.raslgab.gowork.services;
 
 import lombok.RequiredArgsConstructor;
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import ru.itis.raslgab.gowork.dto.BookingListItemDto;
+import ru.itis.raslgab.gowork.dto.BookingMailDto;
 import ru.itis.raslgab.gowork.forms.BookingCreateForm;
 import ru.itis.raslgab.gowork.models.Booking;
 import ru.itis.raslgab.gowork.models.Room;
@@ -19,6 +21,7 @@ import java.time.ZoneOffset;
 import java.util.List;
 
 @Service
+@Slf4j
 @RequiredArgsConstructor
 public class BookingServiceImpl implements BookingService {
     private static final List<BookingStatus> BLOCKING_STATUSES = List.of(
@@ -30,6 +33,7 @@ public class BookingServiceImpl implements BookingService {
     private final RoomRepo roomRepo;
     private final UserRepo userRepo;
     private final BookingApprovalService bookingApprovalService;
+    private final MailService mailService;
 
     @Override
     @Transactional
@@ -78,6 +82,19 @@ public class BookingServiceImpl implements BookingService {
         return bookingRepo.findUserBookingItems(renterId);
     }
 
+    @Override
+    @Transactional
+    public void cancelBooking(Long bookingId) {
+        Booking booking = bookingRepo.findDetailsById(bookingId)
+                .orElseThrow(() -> new IllegalArgumentException("Заявка на бронь не найдена"));
+        if (booking.getStatus() != BookingStatus.PENDING && booking.getStatus() != BookingStatus.CONFIRMED) {
+            throw new IllegalArgumentException("Эту бронь уже нельзя отменить");
+        }
+
+        booking.setStatus(BookingStatus.CANCELLED);
+        trySendCancellationToOwner(toMailDto(booking));
+    }
+
     private void validateRequest(Room room, BookingCreateForm form) {
         if (room.getStatus() != RoomStatus.AVAILABLE) {
             throw new IllegalArgumentException("Комната сейчас недоступна для бронирования");
@@ -115,5 +132,32 @@ public class BookingServiceImpl implements BookingService {
                 : room.getOrganization().getCity().getUtc();
         int offset = utc == null ? 3 : Math.max(-12, Math.min(14, utc));
         return ZoneOffset.ofHours(offset);
+    }
+
+    private BookingMailDto toMailDto(Booking booking) {
+        User renter = booking.getRenter();
+        User owner = booking.getRoom().getOrganization().getOwner();
+        return BookingMailDto.builder()
+                .bookingId(booking.getId())
+                .renterFullName(renter.getFirstName() + " " + renter.getLastName())
+                .renterEmail(renter.getEmail())
+                .renterPhone(renter.getPhone())
+                .renterProfilePhoto(renter.getAvatarFileName() == null ? "не указано" : renter.getAvatarFileName())
+                .ownerEmail(owner.getEmail())
+                .roomName(booking.getRoom().getName())
+                .organizationName(booking.getRoom().getOrganization().getName())
+                .timeStart(booking.getTimeStart())
+                .timeFinish(booking.getTimeFinish())
+                .numOfPeople(booking.getNumOfPeople())
+                .comment(booking.getComment())
+                .build();
+    }
+
+    private void trySendCancellationToOwner(BookingMailDto dto) {
+        try {
+            mailService.sendBookingCancelledToOwner(dto);
+        } catch (Exception e) {
+            log.warn("Failed to send booking cancellation email for bookingId={}: {}", dto.getBookingId(), e.getMessage());
+        }
     }
 }

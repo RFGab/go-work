@@ -10,4 +10,6 @@ public interface MailService {
     void sendBookingRejected(BookingMailDto booking);
 
     void sendBookingApproved(BookingMailDto booking, byte[] qrCode);
+
+    void sendBookingCancelledToOwner(BookingMailDto booking);
 }

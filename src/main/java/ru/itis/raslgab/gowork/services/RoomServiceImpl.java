@@ -12,6 +12,7 @@ import ru.itis.raslgab.gowork.dto.RoomDetailsDto;
 import ru.itis.raslgab.gowork.dto.RoomOptionDto;
 import ru.itis.raslgab.gowork.dto.SimilarRoomDto;
 import ru.itis.raslgab.gowork.forms.RoomCreateForm;
+import ru.itis.raslgab.gowork.forms.RoomUpdateForm;
 import ru.itis.raslgab.gowork.models.FileInfo;
 import ru.itis.raslgab.gowork.models.Option;
 import ru.itis.raslgab.gowork.models.Organization;
@@ -180,6 +181,46 @@ public class RoomServiceImpl implements RoomService {
     }
 
     @Override
+    @Transactional(readOnly = true)
+    public RoomUpdateForm getUpdateForm(Long roomId) {
+        Room room = roomRepo.findById(roomId)
+                .orElseThrow(() -> new IllegalArgumentException("Комната не найдена"));
+        return RoomUpdateForm.builder()
+                .name(room.getName())
+                .description(room.getDescription())
+                .peopleCapacity(room.getPeopleCapacity())
+                .pricePerHour(room.getPricePerHour())
+                .dayStart(room.getDayStart())
+                .dayEnd(room.getDayEnd())
+                .optionIds(room.getOptions() == null
+                        ? List.of()
+                        : room.getOptions().stream()
+                        .map(Option::getId)
+                        .toList())
+                .build();
+    }
+
+    @Override
+    @Transactional
+    public void updateRoom(Long roomId, RoomUpdateForm form) {
+        Room room = roomRepo.findById(roomId)
+                .orElseThrow(() -> new IllegalArgumentException("Комната не найдена"));
+        validateWorkingHours(form.getDayStart(), form.getDayEnd());
+
+        Set<Option> options = form.getOptionIds() == null || form.getOptionIds().isEmpty()
+                ? Set.of()
+                : new HashSet<>(optionRepo.findAllById(form.getOptionIds()));
+
+        room.setName(form.getName().trim());
+        room.setDescription(trimToNull(form.getDescription()));
+        room.setPeopleCapacity(form.getPeopleCapacity());
+        room.setPricePerHour(form.getPricePerHour());
+        room.setDayStart(form.getDayStart());
+        room.setDayEnd(form.getDayEnd());
+        room.setOptions(options);
+    }
+
+    @Override
     @Transactional
     public void addRoomImages(Long roomId, List<MultipartFile> images) {
         Room room = roomRepo.findByIdWithImages(roomId)
@@ -199,6 +240,23 @@ public class RoomServiceImpl implements RoomService {
             roomImages.add(fileInfoRepo.findByStorageFileName(fileName));
         }
         room.setImages(roomImages);
+        roomRepo.save(room);
+    }
+
+    @Override
+    @Transactional
+    public void deleteRoomImage(Long roomId, String fileName) {
+        Room room = roomRepo.findByIdWithImages(roomId)
+                .orElseThrow(() -> new IllegalArgumentException("Комната не найдена"));
+        if (fileName == null || fileName.isBlank()) {
+            throw new IllegalArgumentException("Фото не выбрано");
+        }
+        Set<FileInfo> images = room.getImages() == null ? new HashSet<>() : new HashSet<>(room.getImages());
+        boolean removed = images.removeIf(image -> fileName.equals(image.getStorageFileName()));
+        if (!removed) {
+            throw new IllegalArgumentException("Фото комнаты не найдено");
+        }
+        room.setImages(images);
         roomRepo.save(room);
     }
 

@@ -65,6 +65,14 @@ public class MailServiceImpl implements MailService {
         });
     }
 
+    @Override
+    public void sendBookingCancelledToOwner(BookingMailDto booking) {
+        Context context = new Context();
+        context.setVariable("booking", booking);
+        String mailText = templateEngine.process("mail/booking-cancelled-owner", context);
+        javaMailSender.send(getEmail(booking.getOwnerEmail(), "Бронь отменена арендатором", mailText));
+    }
+
     private MimeMessagePreparator getEmail(String email, String subject, String mailText) {
         return mimeMessage -> {
             MimeMessageHelper helper = new MimeMessageHelper(mimeMessage, true, "UTF-8");

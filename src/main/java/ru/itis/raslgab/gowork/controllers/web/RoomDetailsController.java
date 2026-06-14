@@ -18,6 +18,7 @@ import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.multipart.MultipartFile;
 import org.springframework.web.servlet.mvc.support.RedirectAttributes;
 import ru.itis.raslgab.gowork.forms.BookingCreateForm;
+import ru.itis.raslgab.gowork.forms.RoomUpdateForm;
 import ru.itis.raslgab.gowork.models.enums.RoomStatus;
 import ru.itis.raslgab.gowork.security.UserDetailsImpl;
 import ru.itis.raslgab.gowork.services.BookingService;
@@ -87,6 +88,37 @@ public class RoomDetailsController {
         }
     }
 
+    @PostMapping("/{roomId}")
+    @PreAuthorize("@roomSecurityService.canManage(#roomId, authentication)")
+    public String updateRoom(@AuthenticationPrincipal UserDetailsImpl userDetails,
+                             Authentication authentication,
+                             @PathVariable Long roomId,
+                             @Valid @ModelAttribute("roomForm") RoomUpdateForm form,
+                             BindingResult bindingResult,
+                             Model model,
+                             RedirectAttributes redirectAttributes) {
+        Long userId = userDetails.getUserId();
+        LocalDate selectedDate = currentRoomDate(roomId);
+
+        if (bindingResult.hasErrors()) {
+            addRoomPageAttributes(authentication, roomId, selectedDate, model);
+            userActionLogService.log(userId, "ROOM_UPDATE_FAILED", "roomId=" + roomId + ", validation errors");
+            return "rooms/show";
+        }
+
+        try {
+            roomService.updateRoom(roomId, form);
+            userActionLogService.log(userId, "ROOM_UPDATE_SUCCESS", "roomId=" + roomId);
+            redirectAttributes.addFlashAttribute("successMessage", "Комната обновлена");
+            return "redirect:/rooms/" + roomId;
+        } catch (IllegalArgumentException e) {
+            bindingResult.reject("room.invalid", e.getMessage());
+            addRoomPageAttributes(authentication, roomId, selectedDate, model);
+            userActionLogService.log(userId, "ROOM_UPDATE_FAILED", "roomId=" + roomId + ", " + e.getMessage());
+            return "rooms/show";
+        }
+    }
+
     @PostMapping("/{roomId}/images")
     @PreAuthorize("@roomSecurityService.canManage(#roomId, authentication)")
     public String addImages(@AuthenticationPrincipal UserDetailsImpl userDetails,
@@ -112,8 +144,13 @@ public class RoomDetailsController {
         model.addAttribute("hourSlots", roomService.getHourSlots(roomId, selectedDate));
         model.addAttribute("options", roomService.getOptions(roomId));
         model.addAttribute("similarRooms", roomService.getSimilarRooms(roomId));
-        model.addAttribute("canManageRoom", roomSecurityService.canManage(roomId, authentication));
+        boolean canManageRoom = roomSecurityService.canManage(roomId, authentication);
+        model.addAttribute("canManageRoom", canManageRoom);
         model.addAttribute("roomStatuses", RoomStatus.values());
+        model.addAttribute("allOptions", roomService.getAllOptions());
+        if (canManageRoom && !model.containsAttribute("roomForm")) {
+            model.addAttribute("roomForm", roomService.getUpdateForm(roomId));
+        }
     }
 
     private void logIfAuthenticated(UserDetailsImpl userDetails, String action, String details) {

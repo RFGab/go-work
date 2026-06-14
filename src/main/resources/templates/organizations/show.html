@@ -15,7 +15,7 @@
                 <span th:text="'Владелец: ' + ${organization.ownerFullName}">Владелец</span>
             </div>
         </div>
-        <span id="organizationStatusBadge" class="badge text-bg-secondary fs-6" th:text="${organization.status}">ACTIVE</span>
+        <span id="organizationStatusBadge" class="badge text-bg-secondary fs-6" th:text="${organization.status.displayName}">Активна</span>
     </div>
 
     <div th:if="${successMessage}" class="alert alert-success" th:text="${successMessage}"></div>
@@ -133,8 +133,8 @@
                         <select id="status" name="status" class="form-select">
                             <option th:each="status : ${statuses}"
                                     th:value="${status}"
-                                    th:text="${status}"
-                                    th:selected="${status == organization.status}">ACTIVE</option>
+                                    th:text="${status.displayName}"
+                                    th:selected="${status == organization.status}">Активна</option>
                         </select>
                     </div>
                     <div class="col-auto">
@@ -171,7 +171,7 @@
                        th:text="${room.name}">Комната</a>
                     <div class="text-muted small" th:text="${room.description ?: 'Описание не указано'}">Описание</div>
                 </div>
-                <span class="badge text-bg-light align-self-start" th:text="${room.status}">AVAILABLE</span>
+                <span class="badge text-bg-light align-self-start" th:text="${room.status.displayName}">Доступна</span>
             </div>
             <div class="small mt-2">
                 <span th:text="${room.peopleCapacity}">0</span>
@@ -294,7 +294,7 @@
                 const data = await response.json();
                 showStatusMessage(data.success, data.message);
                 if (data.success && organizationStatusBadge) {
-                    organizationStatusBadge.textContent = form.querySelector('[name="status"]').value;
+                    organizationStatusBadge.textContent = form.querySelector('[name="status"]').selectedOptions[0].textContent;
                 }
             });
         });

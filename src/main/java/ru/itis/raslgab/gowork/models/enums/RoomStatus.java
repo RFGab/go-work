@@ -1,9 +1,15 @@
 package ru.itis.raslgab.gowork.models.enums;
 
-// для статуса комнаты
+import lombok.Getter;
+import lombok.RequiredArgsConstructor;
+
+@Getter
+@RequiredArgsConstructor
 public enum RoomStatus {
-    AVAILABLE,
-    BOOKED,           // забронена
-    UNAVAILABLE,      // владелец вручную закрыл
-    MAINTENANCE
+    AVAILABLE("Доступна"),
+    BOOKED("Забронирована"),
+    UNAVAILABLE("Недоступна"),
+    MAINTENANCE("На обслуживании");
+
+    private final String displayName;
 }

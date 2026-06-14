@@ -1,0 +1,23 @@
+<!DOCTYPE html>
+<html lang="ru" xmlns:th="http://www.thymeleaf.org">
+<head>
+    <meta charset="UTF-8">
+    <title>Бронь отменена</title>
+</head>
+<body style="font-family: Arial, sans-serif; line-height: 1.5;">
+<h2>Бронь отменена арендатором</h2>
+<p>
+    Пользователь <strong th:text="${booking.renterFullName}">Гость</strong>
+    отменил бронь комнаты <strong th:text="${booking.roomName}">Комната</strong>
+    в организации <strong th:text="${booking.organizationName}">Организация</strong>.
+</p>
+<ul>
+    <li>Email арендатора: <span th:text="${booking.renterEmail}">email@example.com</span></li>
+    <li>Телефон: <span th:text="${booking.renterPhone ?: 'не указан'}">+7</span></li>
+    <li>С: <span th:text="${#temporals.format(booking.timeStart, 'dd.MM.yyyy HH:mm')}">01.01.2026 10:00</span></li>
+    <li>До: <span th:text="${#temporals.format(booking.timeFinish, 'dd.MM.yyyy HH:mm')}">01.01.2026 12:00</span></li>
+    <li>Людей: <span th:text="${booking.numOfPeople}">1</span></li>
+</ul>
+<p>Слот снова можно использовать для других заявок, если комната доступна.</p>
+</body>
+</html>
