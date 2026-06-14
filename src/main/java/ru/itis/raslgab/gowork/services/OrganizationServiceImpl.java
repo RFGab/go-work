@@ -217,6 +217,7 @@ public class OrganizationServiceImpl implements OrganizationService {
         return cityRepo.findByNameIgnoreCase(normalizedCityName)
                 .orElseGet(() -> cityRepo.save(City.builder()
                         .name(normalizedCityName)
+                        .utc(3)
                         .build()));
     }
 

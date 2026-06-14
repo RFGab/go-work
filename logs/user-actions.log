@@ -1,3 +1,20 @@
-2026-06-06 09:32:51.110 INFO  [http-nio-8080-exec-10] USER_ACTIONS - userId=1 action=ROOM_CATALOG_OPEN details=cityId=null, availableToday=false, minCapacity=null, page=0, size=9
-2026-06-06 09:32:53.596 INFO  [http-nio-8080-exec-2] USER_ACTIONS - userId=1 action=ROOM_OPEN details=roomId=1
-2026-06-06 09:33:11.117 INFO  [http-nio-8080-exec-4] USER_ACTIONS - userId=1 action=BOOKING_CREATE_FAILED details=roomId=1, Время окончания должно быть позже времени начала
+2026-06-13 06:14:14.713 INFO  [http-nio-8080-exec-10] USER_ACTIONS - userId=1 action=PROFILE_OPEN details=Profile page opened
+2026-06-13 08:49:48.596 INFO  [http-nio-8080-exec-3] USER_ACTIONS - userId=1 action=ORGANIZATION_CATALOG_OPEN details=cityId=null, name=null
+2026-06-13 08:49:50.468 INFO  [http-nio-8080-exec-7] USER_ACTIONS - userId=1 action=ORGANIZATION_OPEN details=organizationId=1
+2026-06-13 08:49:53.796 INFO  [http-nio-8080-exec-10] USER_ACTIONS - userId=1 action=ROOM_OPEN details=roomId=3
+2026-06-13 08:49:56.791 INFO  [http-nio-8080-exec-2] USER_ACTIONS - userId=1 action=ROOM_OPEN details=roomId=3
+2026-06-13 08:50:23.199 INFO  [http-nio-8080-exec-4] USER_ACTIONS - userId=1 action=BOOKING_CREATE_SUCCESS details=roomId=3, bookingId=13
+2026-06-13 08:50:23.294 INFO  [http-nio-8080-exec-5] USER_ACTIONS - userId=1 action=ROOM_OPEN details=roomId=3
+2026-06-13 08:51:32.444 INFO  [http-nio-8080-exec-1] USER_ACTIONS - userId=1 action=BOOKING_CREATE_FAILED details=roomId=3, validation errors
+2026-06-13 08:51:39.949 INFO  [http-nio-8080-exec-2] USER_ACTIONS - userId=1 action=BOOKING_CREATE_SUCCESS details=roomId=3, bookingId=14
+2026-06-13 08:51:40.048 INFO  [http-nio-8080-exec-3] USER_ACTIONS - userId=1 action=ROOM_OPEN details=roomId=3
+2026-06-13 09:44:36.190 INFO  [http-nio-8080-exec-9] USER_ACTIONS - userId=1 action=ORGANIZATION_CATALOG_OPEN details=cityId=null, name=null
+2026-06-13 09:44:38.589 INFO  [http-nio-8080-exec-7] USER_ACTIONS - userId=1 action=ORGANIZATION_CREATE_OPEN details=Organization create page opened
+2026-06-13 09:44:41.612 INFO  [http-nio-8080-exec-10] USER_ACTIONS - userId=1 action=ROOM_CATALOG_OPEN details=cityId=null, availableToday=false, minCapacity=null, page=0, size=9
+2026-06-13 09:44:42.499 INFO  [http-nio-8080-exec-3] USER_ACTIONS - userId=1 action=ORGANIZATION_CATALOG_OPEN details=cityId=null, name=null
+2026-06-13 09:44:43.882 INFO  [http-nio-8080-exec-5] USER_ACTIONS - userId=1 action=ORGANIZATION_OPEN details=organizationId=1
+2026-06-13 09:44:53.043 INFO  [http-nio-8080-exec-8] USER_ACTIONS - userId=1 action=ROOM_CREATE_OPEN details=organizationId=1
+2026-06-13 09:45:08.280 INFO  [http-nio-8080-exec-2] USER_ACTIONS - userId=1 action=ROOM_CREATE_SUCCESS details=organizationId=1, roomId=4
+2026-06-13 09:45:08.301 INFO  [http-nio-8080-exec-3] USER_ACTIONS - userId=1 action=ORGANIZATION_OPEN details=organizationId=1
+2026-06-13 09:45:16.962 INFO  [http-nio-8080-exec-6] USER_ACTIONS - userId=1 action=ROOM_OPEN details=roomId=1
+2026-06-13 09:45:32.762 INFO  [http-nio-8080-exec-10] USER_ACTIONS - userId=1 action=ROOM_OPEN details=roomId=3

@@ -39,6 +39,8 @@ public class AdminEntityForm {
     private BigDecimal pricePerHour;
     private Long organizationId;
     private RoomStatus roomStatus;
+    private Integer dayStart;
+    private Integer dayEnd;
 
     private Long roomId;
     private Long renterId;
@@ -51,6 +53,7 @@ public class AdminEntityForm {
     private BookingStatus bookingStatus;
 
     private OptionCategory category;
+    private Integer utc;
 
     private Long authorId;
     private Integer rating;

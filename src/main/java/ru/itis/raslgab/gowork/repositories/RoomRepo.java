@@ -29,6 +29,9 @@ public interface RoomRepo extends JpaRepository<Room, Long> {
                 r.peopleCapacity,
                 r.pricePerHour,
                 r.status,
+                null,
+                r.dayStart,
+                r.dayEnd,
                 null
             )
             from Room r
@@ -48,7 +51,10 @@ public interface RoomRepo extends JpaRepository<Room, Long> {
                 r.peopleCapacity,
                 r.pricePerHour,
                 r.status,
-                null
+                null,
+                r.dayStart,
+                r.dayEnd,
+                c.utc
             )
             from Room r
             join r.organization o
@@ -91,7 +97,10 @@ public interface RoomRepo extends JpaRepository<Room, Long> {
                 r.status,
                 null,
                 null,
-                false
+                false,
+                r.dayStart,
+                r.dayEnd,
+                c.utc
             )
             from Room r
             join r.organization o

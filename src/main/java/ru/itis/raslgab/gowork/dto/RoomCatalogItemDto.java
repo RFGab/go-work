@@ -23,4 +23,7 @@ public class RoomCatalogItemDto {
     private BigDecimal pricePerHour;
     private RoomStatus status;
     private BigDecimal availableHoursToday;
+    private Integer dayStart;
+    private Integer dayEnd;
+    private Integer cityUtc;
 }

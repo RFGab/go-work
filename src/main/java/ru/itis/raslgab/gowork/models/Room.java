@@ -46,6 +46,12 @@ public class Room {
     @Enumerated(EnumType.STRING)
     private RoomStatus status;
 
+    @Builder.Default
+    private Integer dayStart = 9;
+
+    @Builder.Default
+    private Integer dayEnd = 17;
+
     @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "organization_id", nullable = false)
     private Organization organization;

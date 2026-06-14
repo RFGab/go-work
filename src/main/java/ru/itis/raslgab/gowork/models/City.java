@@ -18,4 +18,7 @@ public class City {
 
     @Column(nullable = false)
     private String name;
+
+    @Builder.Default
+    private Integer utc = 3;
 }

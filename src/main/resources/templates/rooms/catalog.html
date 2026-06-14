@@ -82,6 +82,13 @@
                     <span> ₽/час</span>
                 </div>
 
+                <div class="small text-muted mb-2">
+                    <span>Работает: </span>
+                    <span th:text="${#numbers.formatInteger(room.dayStart ?: 9, 2)} + ':00'">09:00</span>
+                    <span> - </span>
+                    <span th:text="${(room.dayEnd ?: 17) == 24 ? '24:00' : #numbers.formatInteger(room.dayEnd ?: 17, 2) + ':00'}">17:00</span>
+                </div>
+
                 <div class="fw-semibold">
                     <span th:text="${room.availableHoursToday}">0.00</span>
                     <span> свободных часов сегодня</span>

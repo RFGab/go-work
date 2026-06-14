@@ -38,6 +38,8 @@ public class RoomController {
         if (!model.containsAttribute("roomForm")) {
             model.addAttribute("roomForm", RoomCreateForm.builder()
                     .status(RoomStatus.AVAILABLE)
+                    .dayStart(9)
+                    .dayEnd(17)
                     .build());
         }
         return "rooms/new";
@@ -58,10 +60,17 @@ public class RoomController {
             return "rooms/new";
         }
 
-        Long roomId = roomService.createRoom(organizationId, userId, form);
-        userActionLogService.log(userId, "ROOM_CREATE_SUCCESS", "organizationId=" + organizationId + ", roomId=" + roomId);
-        redirectAttributes.addFlashAttribute("successMessage", "Комната создана");
-        return "redirect:/organizations/" + organizationId;
+        try {
+            Long roomId = roomService.createRoom(organizationId, userId, form);
+            userActionLogService.log(userId, "ROOM_CREATE_SUCCESS", "organizationId=" + organizationId + ", roomId=" + roomId);
+            redirectAttributes.addFlashAttribute("successMessage", "Комната создана");
+            return "redirect:/organizations/" + organizationId;
+        } catch (IllegalArgumentException e) {
+            bindingResult.reject("room.invalid", e.getMessage());
+            addCreatePageAttributes(organizationId, model);
+            userActionLogService.log(userId, "ROOM_CREATE_FAILED", "organizationId=" + organizationId + ", " + e.getMessage());
+            return "rooms/new";
+        }
     }
 
     private void addCreatePageAttributes(Long organizationId, Model model) {

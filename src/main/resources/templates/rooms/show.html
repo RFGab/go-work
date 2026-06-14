@@ -62,7 +62,15 @@
                 <dt class="col-sm-4">Доступность сегодня</dt>
                 <dd class="col-sm-8">
                     <span th:text="${room.availableHoursToday}">0.00</span>
-                    <span> свободных часов из 24</span>
+                    <span> свободных часов в рабочее время</span>
+                </dd>
+
+                <dt class="col-sm-4">Рабочее время</dt>
+                <dd class="col-sm-8">
+                    <span th:text="${#numbers.formatInteger(room.dayStart ?: 9, 2)} + ':00'">09:00</span>
+                    <span> - </span>
+                    <span th:text="${(room.dayEnd ?: 17) == 24 ? '24:00' : #numbers.formatInteger(room.dayEnd ?: 17, 2) + ':00'}">17:00</span>
+                    <span class="text-muted" th:text="${' · UTC' + (room.cityUtc == null || room.cityUtc >= 0 ? '+' : '') + (room.cityUtc ?: 3)}">UTC+3</span>
                 </dd>
             </dl>
 
@@ -85,7 +93,7 @@
                 <div class="d-flex justify-content-between align-items-end gap-3 mb-3">
                     <div>
                         <h2 class="h4 mb-1">Заявка на бронь</h2>
-                        <div class="text-muted small">Серые часы заняты заявками или подтвержденными бронями.</div>
+                        <div class="text-muted small">Серые часы находятся вне рабочего времени, уже прошли или заняты заявками/бронями.</div>
                     </div>
                     <form th:action="@{/rooms/{id}(id=${room.id})}" method="get" class="d-flex gap-2 align-items-end">
                         <div>

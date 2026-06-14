@@ -1,6 +1,8 @@
 package ru.itis.raslgab.gowork.forms;
 
 import jakarta.validation.constraints.DecimalMin;
+import jakarta.validation.constraints.Max;
+import jakarta.validation.constraints.Min;
 import jakarta.validation.constraints.NotBlank;
 import jakarta.validation.constraints.NotNull;
 import jakarta.validation.constraints.Positive;
@@ -36,6 +38,16 @@ public class RoomCreateForm {
 
     @NotNull(message = "Выберите статус")
     private RoomStatus status;
+
+    @NotNull(message = "Укажите начало рабочего дня")
+    @Min(value = 0, message = "Начало рабочего дня должно быть от 0 до 24")
+    @Max(value = 24, message = "Начало рабочего дня должно быть от 0 до 24")
+    private Integer dayStart;
+
+    @NotNull(message = "Укажите конец рабочего дня")
+    @Min(value = 0, message = "Конец рабочего дня должен быть от 0 до 24")
+    @Max(value = 24, message = "Конец рабочего дня должен быть от 0 до 24")
+    private Integer dayEnd;
 
     private List<Long> optionIds;
 }

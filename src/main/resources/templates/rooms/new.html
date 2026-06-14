@@ -17,6 +17,10 @@
                   th:object="${roomForm}"
                   method="post"
                   class="vstack gap-3">
+                <div th:if="${#fields.hasGlobalErrors()}" class="alert alert-danger">
+                    <div th:each="err : ${#fields.globalErrors()}" th:text="${err}">Ошибка</div>
+                </div>
+
                 <div>
                     <label for="name" class="form-label">Название</label>
                     <input id="name" type="text" class="form-control" th:field="*{name}" maxlength="30">
@@ -50,6 +54,20 @@
                                 th:text="${status}">AVAILABLE</option>
                     </select>
                     <div class="text-danger small" th:if="${#fields.hasErrors('status')}" th:errors="*{status}"></div>
+                </div>
+
+                <div class="row g-3">
+                    <div class="col-md-6">
+                        <label for="dayStart" class="form-label">Начало рабочего дня</label>
+                        <input id="dayStart" type="number" min="0" max="24" step="1" class="form-control" th:field="*{dayStart}">
+                        <div class="text-danger small" th:if="${#fields.hasErrors('dayStart')}" th:errors="*{dayStart}"></div>
+                    </div>
+                    <div class="col-md-6">
+                        <label for="dayEnd" class="form-label">Конец рабочего дня</label>
+                        <input id="dayEnd" type="number" min="0" max="24" step="1" class="form-control" th:field="*{dayEnd}">
+                        <div class="text-danger small" th:if="${#fields.hasErrors('dayEnd')}" th:errors="*{dayEnd}"></div>
+                    </div>
+                    <div class="form-text">Активные часы бронирования будут только внутри этого окна. По умолчанию 9-17.</div>
                 </div>
 
                 <div>

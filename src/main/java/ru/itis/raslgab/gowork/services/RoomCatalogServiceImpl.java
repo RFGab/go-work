@@ -24,6 +24,7 @@ import java.math.RoundingMode;
 import java.time.Duration;
 import java.time.LocalDate;
 import java.time.LocalDateTime;
+import java.time.ZoneOffset;
 import java.util.ArrayList;
 import java.util.Comparator;
 import java.util.List;
@@ -37,8 +38,6 @@ public class RoomCatalogServiceImpl implements RoomCatalogService {
             BookingStatus.PENDING,
             BookingStatus.CONFIRMED
     );
-    private static final BigDecimal DAY_HOURS = BigDecimal.valueOf(24);
-
     private final RoomRepo roomRepo;
     private final BookingRepo bookingRepo;
     private final CityRepo cityRepo;
@@ -67,21 +66,19 @@ public class RoomCatalogServiceImpl implements RoomCatalogService {
             return roomsPage;
         }
 
-        LocalDateTime dayStart = LocalDate.now().atStartOfDay();
-        LocalDateTime dayEnd = dayStart.plusDays(1);
         List<Long> roomIds = rooms.stream()
                 .map(RoomCatalogItemDto::getId)
                 .toList();
         Map<Long, List<BookingIntervalDto>> intervalsByRoom = bookingRepo.findBlockingIntervals(
                         roomIds,
                         BLOCKING_STATUSES,
-                        dayStart,
-                        dayEnd
+                        LocalDate.now().minusDays(1).atStartOfDay(),
+                        LocalDate.now().plusDays(2).atStartOfDay()
                 ).stream()
                 .collect(Collectors.groupingBy(BookingIntervalDto::getRoomId));
 
         List<RoomCatalogItemDto> enrichedRooms = rooms.stream()
-                .peek(room -> room.setAvailableHoursToday(calculateAvailableHours(room, intervalsByRoom.get(room.getId()), dayStart, dayEnd)))
+                .peek(room -> room.setAvailableHoursToday(calculateAvailableHours(room, intervalsByRoom.get(room.getId()))))
                 .toList();
 
         return new PageImpl<>(
@@ -98,18 +95,47 @@ public class RoomCatalogServiceImpl implements RoomCatalogService {
     }
 
     private BigDecimal calculateAvailableHours(RoomCatalogItemDto room,
-                                               List<BookingIntervalDto> intervals,
-                                               LocalDateTime dayStart,
-                                               LocalDateTime dayEnd) {
+                                               List<BookingIntervalDto> intervals) {
         if (room.getStatus() != RoomStatus.AVAILABLE) {
             return BigDecimal.ZERO.setScale(2, RoundingMode.HALF_UP);
         }
 
-        long busyMinutes = mergeAndCountBusyMinutes(intervals == null ? List.of() : intervals, dayStart, dayEnd);
+        LocalDate today = LocalDate.now(zoneOffset(room.getCityUtc()));
+        LocalDateTime workStart = atHour(today, safeDayStart(room.getDayStart()));
+        LocalDateTime workEnd = workEnd(today, room.getDayEnd());
+        long workMinutes = Duration.between(workStart, workEnd).toMinutes();
+        if (workMinutes <= 0) {
+            return BigDecimal.ZERO.setScale(2, RoundingMode.HALF_UP);
+        }
+
+        long busyMinutes = mergeAndCountBusyMinutes(intervals == null ? List.of() : intervals, workStart, workEnd);
         BigDecimal busyHours = BigDecimal.valueOf(busyMinutes)
                 .divide(BigDecimal.valueOf(60), 2, RoundingMode.HALF_UP);
-        BigDecimal available = DAY_HOURS.subtract(busyHours);
+        BigDecimal workHours = BigDecimal.valueOf(workMinutes)
+                .divide(BigDecimal.valueOf(60), 2, RoundingMode.HALF_UP);
+        BigDecimal available = workHours.subtract(busyHours);
         return available.max(BigDecimal.ZERO).setScale(2, RoundingMode.HALF_UP);
+    }
+
+    private LocalDateTime workEnd(LocalDate date, Integer dayEnd) {
+        return atHour(date, safeDayEnd(dayEnd));
+    }
+
+    private int safeDayStart(Integer value) {
+        return value == null ? 9 : Math.max(0, Math.min(24, value));
+    }
+
+    private int safeDayEnd(Integer value) {
+        return value == null ? 17 : Math.max(0, Math.min(24, value));
+    }
+
+    private ZoneOffset zoneOffset(Integer utc) {
+        int offset = utc == null ? 3 : Math.max(-12, Math.min(14, utc));
+        return ZoneOffset.ofHours(offset);
+    }
+
+    private LocalDateTime atHour(LocalDate date, int hour) {
+        return hour == 24 ? date.plusDays(1).atStartOfDay() : date.atTime(hour, 0);
     }
 
     private long mergeAndCountBusyMinutes(List<BookingIntervalDto> intervals,

@@ -32,6 +32,7 @@ import java.math.RoundingMode;
 import java.time.Duration;
 import java.time.LocalDate;
 import java.time.LocalDateTime;
+import java.time.ZoneOffset;
 import java.util.ArrayList;
 import java.util.Comparator;
 import java.util.HashSet;
@@ -45,7 +46,6 @@ public class RoomServiceImpl implements RoomService {
             BookingStatus.PENDING,
             BookingStatus.CONFIRMED
     );
-    private static final BigDecimal DAY_HOURS = BigDecimal.valueOf(24);
     private static final List<RoomStatus> CREATE_STATUSES = List.of(
             RoomStatus.AVAILABLE,
             RoomStatus.UNAVAILABLE,
@@ -70,7 +70,8 @@ public class RoomServiceImpl implements RoomService {
         RoomDetailsDto room = roomRepo.findDetailsById(roomId)
                 .orElseThrow(() -> new IllegalArgumentException("Комната не найдена"));
 
-        LocalDateTime dayStart = LocalDate.now().atStartOfDay();
+        LocalDate today = LocalDate.now(zoneOffset(room.getCityUtc()));
+        LocalDateTime dayStart = today.atStartOfDay();
         LocalDateTime dayEnd = dayStart.plusDays(1);
         List<BookingIntervalDto> intervals = bookingRepo.findBlockingIntervals(
                 List.of(roomId),
@@ -78,7 +79,7 @@ public class RoomServiceImpl implements RoomService {
                 dayStart,
                 dayEnd
         );
-        room.setAvailableHoursToday(calculateAvailableHours(room.getStatus(), intervals, dayStart, dayEnd));
+        room.setAvailableHoursToday(calculateAvailableHours(room.getStatus(), intervals, workStart(room, today), workEnd(room, today)));
         room.setImageFileNames(getRoomImageFileNames(roomId));
         return room;
     }
@@ -88,9 +89,10 @@ public class RoomServiceImpl implements RoomService {
     public List<BookingHourSlotDto> getHourSlots(Long roomId, LocalDate bookingDate) {
         RoomDetailsDto room = roomRepo.findDetailsById(roomId)
                 .orElseThrow(() -> new IllegalArgumentException("Комната не найдена"));
-        LocalDate selectedDate = bookingDate == null ? LocalDate.now() : bookingDate;
+        LocalDate selectedDate = bookingDate == null ? LocalDate.now(zoneOffset(room.getCityUtc())) : bookingDate;
         LocalDateTime dayStart = selectedDate.atStartOfDay();
         LocalDateTime dayEnd = dayStart.plusDays(1);
+        LocalDateTime now = LocalDateTime.now(zoneOffset(room.getCityUtc()));
         List<BookingIntervalDto> intervals = bookingRepo.findBlockingIntervals(
                 List.of(roomId),
                 BLOCKING_STATUSES,
@@ -103,7 +105,9 @@ public class RoomServiceImpl implements RoomService {
                     LocalDateTime slotStart = selectedDate.atTime(hour, 0);
                     LocalDateTime slotEnd = slotStart.plusHours(1);
                     boolean available = room.getStatus() == RoomStatus.AVAILABLE
-                            && slotEnd.isAfter(LocalDateTime.now())
+                            && hour >= safeDayStart(room.getDayStart())
+                            && hour < safeDayEnd(room.getDayEnd())
+                            && slotEnd.isAfter(now)
                             && intervals.stream().noneMatch(interval -> overlaps(
                             slotStart,
                             slotEnd,
@@ -171,10 +175,13 @@ public class RoomServiceImpl implements RoomService {
                 .peopleCapacity(form.getPeopleCapacity())
                 .pricePerHour(form.getPricePerHour())
                 .status(form.getStatus())
+                .dayStart(form.getDayStart())
+                .dayEnd(form.getDayEnd())
                 .organization(organization)
                 .options(options)
                 .build();
 
+        validateWorkingHours(room.getDayStart(), room.getDayEnd());
         return roomRepo.save(room).getId();
     }
 
@@ -263,17 +270,55 @@ public class RoomServiceImpl implements RoomService {
 
     private BigDecimal calculateAvailableHours(RoomStatus status,
                                                List<BookingIntervalDto> intervals,
-                                               LocalDateTime dayStart,
-                                               LocalDateTime dayEnd) {
+                                               LocalDateTime workStart,
+                                               LocalDateTime workEnd) {
         if (status != RoomStatus.AVAILABLE) {
             return BigDecimal.ZERO.setScale(2, RoundingMode.HALF_UP);
         }
 
-        long busyMinutes = mergeAndCountBusyMinutes(intervals, dayStart, dayEnd);
+        long workMinutes = Duration.between(workStart, workEnd).toMinutes();
+        if (workMinutes <= 0) {
+            return BigDecimal.ZERO.setScale(2, RoundingMode.HALF_UP);
+        }
+
+        long busyMinutes = mergeAndCountBusyMinutes(intervals, workStart, workEnd);
         BigDecimal busyHours = BigDecimal.valueOf(busyMinutes)
                 .divide(BigDecimal.valueOf(60), 2, RoundingMode.HALF_UP);
-        BigDecimal available = DAY_HOURS.subtract(busyHours);
+        BigDecimal workHours = BigDecimal.valueOf(workMinutes)
+                .divide(BigDecimal.valueOf(60), 2, RoundingMode.HALF_UP);
+        BigDecimal available = workHours.subtract(busyHours);
         return available.max(BigDecimal.ZERO).setScale(2, RoundingMode.HALF_UP);
+    }
+
+    private LocalDateTime workStart(RoomDetailsDto room, LocalDate date) {
+        return atHour(date, safeDayStart(room.getDayStart()));
+    }
+
+    private LocalDateTime workEnd(RoomDetailsDto room, LocalDate date) {
+        return atHour(date, safeDayEnd(room.getDayEnd()));
+    }
+
+    private int safeDayStart(Integer value) {
+        return value == null ? 9 : Math.max(0, Math.min(24, value));
+    }
+
+    private int safeDayEnd(Integer value) {
+        return value == null ? 17 : Math.max(0, Math.min(24, value));
+    }
+
+    private ZoneOffset zoneOffset(Integer utc) {
+        int offset = utc == null ? 3 : Math.max(-12, Math.min(14, utc));
+        return ZoneOffset.ofHours(offset);
+    }
+
+    private void validateWorkingHours(Integer dayStart, Integer dayEnd) {
+        if (safeDayEnd(dayEnd) <= safeDayStart(dayStart)) {
+            throw new IllegalArgumentException("Конец рабочего дня должен быть позже начала");
+        }
+    }
+
+    private LocalDateTime atHour(LocalDate date, int hour) {
+        return hour == 24 ? date.plusDays(1).atStartOfDay() : date.atTime(hour, 0);
     }
 
     private long mergeAndCountBusyMinutes(List<BookingIntervalDto> intervals,

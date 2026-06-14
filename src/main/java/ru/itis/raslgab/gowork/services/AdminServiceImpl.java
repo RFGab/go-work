@@ -142,6 +142,8 @@ public class AdminServiceImpl implements AdminService {
                     .peopleCapacity(form.getPeopleCapacity())
                     .pricePerHour(form.getPricePerHour())
                     .organization(findOrganization(form.getOrganizationId()))
+                    .dayStart(form.getDayStart() == null ? 9 : form.getDayStart())
+                    .dayEnd(form.getDayEnd() == null ? 17 : form.getDayEnd())
                     .status(form.getRoomStatus() == null ? RoomStatus.AVAILABLE : form.getRoomStatus())
                     .build());
             case "bookings" -> bookingRepo.save(Booking.builder()
@@ -155,6 +157,7 @@ public class AdminServiceImpl implements AdminService {
                     .build());
             case "cities" -> cityRepo.save(City.builder()
                     .name(required(form.getName()))
+                    .utc(form.getUtc() == null ? 3 : form.getUtc())
                     .build());
             case "options" -> optionRepo.save(Option.builder()
                     .name(required(form.getName()))
@@ -234,6 +237,8 @@ public class AdminServiceImpl implements AdminService {
         room.setPeopleCapacity(form.getPeopleCapacity());
         room.setPricePerHour(form.getPricePerHour());
         room.setOrganization(findOrganization(form.getOrganizationId()));
+        room.setDayStart(form.getDayStart() == null ? 9 : form.getDayStart());
+        room.setDayEnd(form.getDayEnd() == null ? 17 : form.getDayEnd());
         room.setStatus(form.getRoomStatus() == null ? RoomStatus.AVAILABLE : form.getRoomStatus());
     }
 
@@ -251,6 +256,7 @@ public class AdminServiceImpl implements AdminService {
     private void updateCity(Long id, AdminEntityForm form) {
         City city = findCity(id);
         city.setName(required(form.getName()));
+        city.setUtc(form.getUtc() == null ? 3 : form.getUtc());
     }
 
     private void updateOption(Long id, AdminEntityForm form) {
@@ -297,6 +303,8 @@ public class AdminServiceImpl implements AdminService {
                 field("description", "Описание", "textarea"),
                 field("peopleCapacity", "Вместимость", "number"),
                 field("pricePerHour", "Цена/час", "number"),
+                field("dayStart", "Начало дня", "number"),
+                field("dayEnd", "Конец дня", "number"),
                 select("organizationId", "Организация", organizationOptions()),
                 select("roomStatus", "Статус", enumOptions(RoomStatus.values()))
         );
@@ -315,7 +323,10 @@ public class AdminServiceImpl implements AdminService {
     }
 
     private List<AdminFieldDto> cityFields() {
-        return List.of(field("name", "Название", "text"));
+        return List.of(
+                field("name", "Название", "text"),
+                field("utc", "UTC", "number")
+        );
     }
 
     private List<AdminFieldDto> optionFields() {
@@ -364,6 +375,8 @@ public class AdminServiceImpl implements AdminService {
                 "description", value(room.getDescription()),
                 "peopleCapacity", value(room.getPeopleCapacity()),
                 "pricePerHour", value(room.getPricePerHour()),
+                "dayStart", value(room.getDayStart()),
+                "dayEnd", value(room.getDayEnd()),
                 "organizationId", room.getOrganization() == null ? "" : String.valueOf(room.getOrganization().getId()),
                 "roomStatus", value(room.getStatus())
         ));
@@ -382,7 +395,10 @@ public class AdminServiceImpl implements AdminService {
     }
 
     private AdminRowDto cityRow(City city) {
-        return row(city.getId(), Map.of("name", value(city.getName())));
+        return row(city.getId(), Map.of(
+                "name", value(city.getName()),
+                "utc", value(city.getUtc())
+        ));
     }
 
     private AdminRowDto optionRow(Option option) {
@@ -472,7 +488,7 @@ public class AdminServiceImpl implements AdminService {
     private City getOrCreateCity(String cityName) {
         String name = required(cityName);
         return cityRepo.findByNameIgnoreCase(name)
-                .orElseGet(() -> cityRepo.save(City.builder().name(name).build()));
+                .orElseGet(() -> cityRepo.save(City.builder().name(name).utc(3).build()));
     }
 
     private String required(String value) {
@@ -508,7 +524,7 @@ public class AdminServiceImpl implements AdminService {
         List<String> allowed = switch (entity) {
             case "users" -> List.of("id", "email", "firstName", "lastName", "role");
             case "organizations" -> List.of("id", "name", "status", "contactEmail");
-            case "rooms" -> List.of("id", "name", "peopleCapacity", "pricePerHour", "status");
+            case "rooms" -> List.of("id", "name", "peopleCapacity", "pricePerHour", "status", "dayStart", "dayEnd");
             case "bookings" -> List.of("id", "timeStart", "timeFinish", "status", "numOfPeople");
             case "cities", "options" -> List.of("id", "name");
             case "reviews" -> List.of("id", "rating", "createdAt");

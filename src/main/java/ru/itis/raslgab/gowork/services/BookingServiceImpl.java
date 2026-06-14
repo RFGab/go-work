@@ -15,6 +15,7 @@ import ru.itis.raslgab.gowork.repositories.RoomRepo;
 import ru.itis.raslgab.gowork.repositories.UserRepo;
 
 import java.time.LocalDateTime;
+import java.time.ZoneOffset;
 import java.util.List;
 
 @Service
@@ -84,8 +85,11 @@ public class BookingServiceImpl implements BookingService {
         if (form.getFinishHour() <= form.getStartHour()) {
             throw new IllegalArgumentException("Время окончания должно быть позже времени начала");
         }
+        if (form.getStartHour() < safeDayStart(room.getDayStart()) || form.getFinishHour() > safeDayEnd(room.getDayEnd())) {
+            throw new IllegalArgumentException("Выбранное время должно быть внутри рабочего времени комнаты");
+        }
         LocalDateTime timeStart = form.getBookingDate().atTime(form.getStartHour(), 0);
-        if (timeStart.isBefore(LocalDateTime.now())) {
+        if (timeStart.isBefore(LocalDateTime.now(zoneOffset(room)))) {
             throw new IllegalArgumentException("Нельзя создать заявку на прошедшее время");
         }
         if (form.getNumOfPeople() > room.getPeopleCapacity()) {
@@ -95,5 +99,21 @@ public class BookingServiceImpl implements BookingService {
 
     private String trimToNull(String value) {
         return value == null || value.isBlank() ? null : value.trim();
+    }
+
+    private int safeDayStart(Integer value) {
+        return value == null ? 9 : Math.max(0, Math.min(24, value));
+    }
+
+    private int safeDayEnd(Integer value) {
+        return value == null ? 17 : Math.max(0, Math.min(24, value));
+    }
+
+    private ZoneOffset zoneOffset(Room room) {
+        Integer utc = room.getOrganization() == null || room.getOrganization().getCity() == null
+                ? null
+                : room.getOrganization().getCity().getUtc();
+        int offset = utc == null ? 3 : Math.max(-12, Math.min(14, utc));
+        return ZoneOffset.ofHours(offset);
     }
 }

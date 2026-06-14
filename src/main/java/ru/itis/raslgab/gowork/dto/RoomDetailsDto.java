@@ -29,4 +29,7 @@ public class RoomDetailsDto {
     private BigDecimal availableHoursToday;
     private List<String> imageFileNames;
     private boolean canManage;
+    private Integer dayStart;
+    private Integer dayEnd;
+    private Integer cityUtc;
 }

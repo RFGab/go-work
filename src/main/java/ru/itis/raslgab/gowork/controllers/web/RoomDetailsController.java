@@ -23,6 +23,7 @@ import ru.itis.raslgab.gowork.services.RoomService;
 import ru.itis.raslgab.gowork.services.UserActionLogService;
 
 import java.time.LocalDate;
+import java.time.ZoneOffset;
 import java.util.List;
 
 @Controller
@@ -39,7 +40,7 @@ public class RoomDetailsController {
                        @RequestParam(required = false)
                        @DateTimeFormat(iso = DateTimeFormat.ISO.DATE) LocalDate bookingDate,
                        Model model) {
-        LocalDate selectedDate = bookingDate == null ? LocalDate.now() : bookingDate;
+        LocalDate selectedDate = bookingDate == null ? currentRoomDate(roomId) : bookingDate;
         addRoomPageAttributes(userDetails, roomId, selectedDate, model);
         if (!model.containsAttribute("bookingForm")) {
             model.addAttribute("bookingForm", BookingCreateForm.builder()
@@ -97,12 +98,19 @@ public class RoomDetailsController {
     }
 
     private void addRoomPageAttributes(UserDetailsImpl userDetails, Long roomId, LocalDate selectedDate, Model model) {
-        model.addAttribute("room", roomService.getRoomDetails(roomId));
+        var room = roomService.getRoomDetails(roomId);
+        model.addAttribute("room", room);
         model.addAttribute("selectedDate", selectedDate);
         model.addAttribute("hourSlots", roomService.getHourSlots(roomId, selectedDate));
         model.addAttribute("options", roomService.getOptions(roomId));
         model.addAttribute("similarRooms", roomService.getSimilarRooms(roomId));
         model.addAttribute("canManageRoom", roomService.canManageRoom(roomId, userDetails.getUserId(), userDetails.getUser().getRole()));
         model.addAttribute("roomStatuses", RoomStatus.values());
+    }
+
+    private LocalDate currentRoomDate(Long roomId) {
+        Integer utc = roomService.getRoomDetails(roomId).getCityUtc();
+        int offset = utc == null ? 3 : Math.max(-12, Math.min(14, utc));
+        return LocalDate.now(ZoneOffset.ofHours(offset));
     }
 }
