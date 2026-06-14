@@ -2,6 +2,7 @@ package ru.itis.raslgab.gowork.controllers.api;
 
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
+import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.security.core.annotation.AuthenticationPrincipal;
 import org.springframework.validation.BindingResult;
 import org.springframework.web.bind.annotation.DeleteMapping;
@@ -22,6 +23,7 @@ public class ReviewApiController {
     private final ReviewService reviewService;
 
     @PostMapping("/organizations/{organizationId}/reviews")
+    @PreAuthorize("@reviewSecurityService.canCreate(#organizationId, authentication)")
     public AdminActionResponseDto create(@AuthenticationPrincipal UserDetailsImpl userDetails,
                                          @PathVariable Long organizationId,
                                          @Valid @ModelAttribute ReviewForm form,
@@ -38,15 +40,15 @@ public class ReviewApiController {
     }
 
     @PostMapping("/reviews/{reviewId}")
-    public AdminActionResponseDto update(@AuthenticationPrincipal UserDetailsImpl userDetails,
-                                         @PathVariable Long reviewId,
+    @PreAuthorize("@reviewSecurityService.isAuthor(#reviewId, authentication)")
+    public AdminActionResponseDto update(@PathVariable Long reviewId,
                                          @Valid @ModelAttribute ReviewForm form,
                                          BindingResult bindingResult) {
         if (bindingResult.hasErrors()) {
             return error(bindingResult);
         }
         try {
-            reviewService.updateReview(reviewId, userDetails.getUserId(), form);
+            reviewService.updateReview(reviewId, form);
             return success("Отзыв обновлен");
         } catch (Exception e) {
             return error(e);
@@ -54,10 +56,10 @@ public class ReviewApiController {
     }
 
     @DeleteMapping("/reviews/{reviewId}")
-    public AdminActionResponseDto delete(@AuthenticationPrincipal UserDetailsImpl userDetails,
-                                         @PathVariable Long reviewId) {
+    @PreAuthorize("@reviewSecurityService.isAuthor(#reviewId, authentication)")
+    public AdminActionResponseDto delete(@PathVariable Long reviewId) {
         try {
-            reviewService.deleteReview(reviewId, userDetails.getUserId());
+            reviewService.deleteReview(reviewId);
             return success("Отзыв удален");
         } catch (Exception e) {
             return error(e);

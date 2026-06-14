@@ -142,8 +142,8 @@ public class AdminServiceImpl implements AdminService {
                     .peopleCapacity(form.getPeopleCapacity())
                     .pricePerHour(form.getPricePerHour())
                     .organization(findOrganization(form.getOrganizationId()))
-                    .dayStart(form.getDayStart() == null ? 9 : form.getDayStart())
-                    .dayEnd(form.getDayEnd() == null ? 17 : form.getDayEnd())
+                    .dayStart(validDayStart(form.getDayStart(), form.getDayEnd()))
+                    .dayEnd(validDayEnd(form.getDayStart(), form.getDayEnd()))
                     .status(form.getRoomStatus() == null ? RoomStatus.AVAILABLE : form.getRoomStatus())
                     .build());
             case "bookings" -> bookingRepo.save(Booking.builder()
@@ -237,8 +237,8 @@ public class AdminServiceImpl implements AdminService {
         room.setPeopleCapacity(form.getPeopleCapacity());
         room.setPricePerHour(form.getPricePerHour());
         room.setOrganization(findOrganization(form.getOrganizationId()));
-        room.setDayStart(form.getDayStart() == null ? 9 : form.getDayStart());
-        room.setDayEnd(form.getDayEnd() == null ? 17 : form.getDayEnd());
+        room.setDayStart(validDayStart(form.getDayStart(), form.getDayEnd()));
+        room.setDayEnd(validDayEnd(form.getDayStart(), form.getDayEnd()));
         room.setStatus(form.getRoomStatus() == null ? RoomStatus.AVAILABLE : form.getRoomStatus());
     }
 
@@ -504,6 +504,27 @@ public class AdminServiceImpl implements AdminService {
 
     private String value(Object value) {
         return value == null ? "" : value.toString();
+    }
+
+    private Integer validDayStart(Integer dayStart, Integer dayEnd) {
+        validateWorkingHours(dayStart, dayEnd);
+        return dayStart;
+    }
+
+    private Integer validDayEnd(Integer dayStart, Integer dayEnd) {
+        validateWorkingHours(dayStart, dayEnd);
+        return dayEnd;
+    }
+
+    private void validateWorkingHours(Integer dayStart, Integer dayEnd) {
+        int start = dayStart == null ? 9 : dayStart;
+        int end = dayEnd == null ? 17 : dayEnd;
+        if (start < 0 || start > 24 || end < 0 || end > 24) {
+            throw new IllegalArgumentException("Рабочие часы должны быть в промежутке от 0 до 24");
+        }
+        if (end <= start) {
+            throw new IllegalArgumentException("Конец рабочего дня должен быть позже начала");
+        }
     }
 
     private int safePage(Integer page) {

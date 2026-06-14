@@ -2,7 +2,6 @@ package ru.itis.raslgab.gowork.services;
 
 import lombok.RequiredArgsConstructor;
 import org.springframework.data.domain.PageRequest;
-import org.springframework.security.access.AccessDeniedException;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import org.springframework.web.multipart.MultipartFile;
@@ -19,7 +18,6 @@ import ru.itis.raslgab.gowork.models.Organization;
 import ru.itis.raslgab.gowork.models.Room;
 import ru.itis.raslgab.gowork.models.enums.BookingStatus;
 import ru.itis.raslgab.gowork.models.enums.OrganizationStatus;
-import ru.itis.raslgab.gowork.models.enums.RoleEnum;
 import ru.itis.raslgab.gowork.models.enums.RoomStatus;
 import ru.itis.raslgab.gowork.repositories.BookingRepo;
 import ru.itis.raslgab.gowork.repositories.FileInfoRepo;
@@ -157,13 +155,9 @@ public class RoomServiceImpl implements RoomService {
 
     @Override
     @Transactional
-    public Long createRoom(Long organizationId, Long ownerId, RoomCreateForm form) {
+    public Long createRoom(Long organizationId, RoomCreateForm form) {
         Organization organization = organizationRepo.findDetailsById(organizationId)
                 .orElseThrow(() -> new IllegalArgumentException("Организация не найдена"));
-
-        if (organization.getOwner() == null || !organization.getOwner().getId().equals(ownerId)) {
-            throw new AccessDeniedException("Создавать комнаты может только владелец организации");
-        }
 
         Set<Option> options = form.getOptionIds() == null || form.getOptionIds().isEmpty()
                 ? Set.of()
@@ -186,19 +180,10 @@ public class RoomServiceImpl implements RoomService {
     }
 
     @Override
-    @Transactional(readOnly = true)
-    public boolean canManageRoom(Long roomId, Long currentUserId, RoleEnum currentUserRole) {
-        Room room = roomRepo.findById(roomId)
-                .orElseThrow(() -> new IllegalArgumentException("Комната не найдена"));
-        return isRoomManager(room, currentUserId, currentUserRole);
-    }
-
-    @Override
     @Transactional
-    public void addRoomImages(Long roomId, Long currentUserId, RoleEnum currentUserRole, List<MultipartFile> images) {
+    public void addRoomImages(Long roomId, List<MultipartFile> images) {
         Room room = roomRepo.findByIdWithImages(roomId)
                 .orElseThrow(() -> new IllegalArgumentException("Комната не найдена"));
-        checkRoomManager(room, currentUserId, currentUserRole);
 
         List<MultipartFile> validImages = images == null ? List.of() : images.stream()
                 .filter(file -> file != null && !file.isEmpty())
@@ -219,10 +204,9 @@ public class RoomServiceImpl implements RoomService {
 
     @Override
     @Transactional
-    public void updateStatus(Long roomId, Long currentUserId, RoleEnum currentUserRole, RoomStatus status) {
+    public void updateStatus(Long roomId, RoomStatus status) {
         Room room = roomRepo.findByIdWithImages(roomId)
                 .orElseThrow(() -> new IllegalArgumentException("Комната не найдена"));
-        checkRoomManager(room, currentUserId, currentUserRole);
         room.setStatus(status);
     }
 
@@ -236,22 +220,6 @@ public class RoomServiceImpl implements RoomService {
                         .map(FileInfo::getStorageFileName)
                         .toList())
                 .orElse(List.of());
-    }
-
-    private void checkRoomManager(Room room, Long currentUserId, RoleEnum currentUserRole) {
-        if (!isRoomManager(room, currentUserId, currentUserRole)) {
-            throw new AccessDeniedException("Управлять фото комнаты может только владелец организации или администратор");
-        }
-    }
-
-    private boolean isRoomManager(Room room, Long currentUserId, RoleEnum currentUserRole) {
-        if (currentUserRole == RoleEnum.ADMIN) {
-            return true;
-        }
-        Organization organization = room.getOrganization();
-        return organization != null
-                && organization.getOwner() != null
-                && organization.getOwner().getId().equals(currentUserId);
     }
 
     private void validateImage(MultipartFile image) {
@@ -312,7 +280,13 @@ public class RoomServiceImpl implements RoomService {
     }
 
     private void validateWorkingHours(Integer dayStart, Integer dayEnd) {
-        if (safeDayEnd(dayEnd) <= safeDayStart(dayStart)) {
+        if (dayStart == null || dayEnd == null) {
+            throw new IllegalArgumentException("Укажите рабочие часы комнаты");
+        }
+        if (dayStart < 0 || dayStart > 24 || dayEnd < 0 || dayEnd > 24) {
+            throw new IllegalArgumentException("Рабочие часы должны быть в промежутке от 0 до 24");
+        }
+        if (dayEnd <= dayStart) {
             throw new IllegalArgumentException("Конец рабочего дня должен быть позже начала");
         }
     }

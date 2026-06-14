@@ -7,7 +7,6 @@ import ru.itis.raslgab.gowork.dto.RoomOptionDto;
 import ru.itis.raslgab.gowork.dto.SimilarRoomDto;
 import ru.itis.raslgab.gowork.forms.RoomCreateForm;
 import ru.itis.raslgab.gowork.models.enums.RoomStatus;
-import ru.itis.raslgab.gowork.models.enums.RoleEnum;
 import org.springframework.web.multipart.MultipartFile;
 
 import java.time.LocalDate;
@@ -28,11 +27,9 @@ public interface RoomService {
 
     List<PopularRoomDto> getPopularRooms();
 
-    Long createRoom(Long organizationId, Long ownerId, RoomCreateForm form);
+    Long createRoom(Long organizationId, RoomCreateForm form);
 
-    boolean canManageRoom(Long roomId, Long currentUserId, RoleEnum currentUserRole);
+    void addRoomImages(Long roomId, List<MultipartFile> images);
 
-    void addRoomImages(Long roomId, Long currentUserId, RoleEnum currentUserRole, List<MultipartFile> images);
-
-    void updateStatus(Long roomId, Long currentUserId, RoleEnum currentUserRole, RoomStatus status);
+    void updateStatus(Long roomId, RoomStatus status);
 }

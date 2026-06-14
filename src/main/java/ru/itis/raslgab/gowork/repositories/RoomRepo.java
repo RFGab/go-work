@@ -32,6 +32,7 @@ public interface RoomRepo extends JpaRepository<Room, Long> {
                 null,
                 r.dayStart,
                 r.dayEnd,
+                null,
                 null
             )
             from Room r
@@ -54,7 +55,8 @@ public interface RoomRepo extends JpaRepository<Room, Long> {
                 null,
                 r.dayStart,
                 r.dayEnd,
-                c.utc
+                c.utc,
+                null
             )
             from Room r
             join r.organization o
@@ -131,6 +133,15 @@ public interface RoomRepo extends JpaRepository<Room, Long> {
             order by opt.category, opt.name
             """)
     List<RoomOptionDto> findOptionsByRoomId(@Param("roomId") Long roomId);
+
+    @Query("""
+            select image.storageFileName
+            from Room r
+            join r.images image
+            where r.id = :roomId
+            order by image.id
+            """)
+    List<String> findImageFileNamesOrderById(@Param("roomId") Long roomId, Pageable pageable);
 
     @Query("""
             select new ru.itis.raslgab.gowork.dto.SimilarRoomDto(

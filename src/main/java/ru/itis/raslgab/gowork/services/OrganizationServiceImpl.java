@@ -4,7 +4,6 @@ import lombok.RequiredArgsConstructor;
 import org.springframework.dao.DataIntegrityViolationException;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageRequest;
-import org.springframework.security.access.AccessDeniedException;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import org.springframework.web.multipart.MultipartFile;
@@ -121,9 +120,8 @@ public class OrganizationServiceImpl implements OrganizationService {
 
     @Override
     @Transactional(readOnly = true)
-    public OrganizationUpdateForm getUpdateForm(Long organizationId, Long currentUserId) {
+    public OrganizationUpdateForm getUpdateForm(Long organizationId) {
         Organization organization = findOrganization(organizationId);
-        checkOwner(organization, currentUserId);
 
         return OrganizationUpdateForm.builder()
                 .id(organization.getId())
@@ -139,14 +137,18 @@ public class OrganizationServiceImpl implements OrganizationService {
     @Override
     @Transactional(readOnly = true)
     public List<RoomCatalogItemDto> getRooms(Long organizationId) {
-        return roomRepo.findCatalogItemsByOrganizationId(organizationId);
+        return roomRepo.findCatalogItemsByOrganizationId(organizationId).stream()
+                .peek(room -> {
+                    List<String> fileNames = roomRepo.findImageFileNamesOrderById(room.getId(), PageRequest.of(0, 1));
+                    room.setCoverImageFileName(fileNames.isEmpty() ? null : fileNames.get(0));
+                })
+                .toList();
     }
 
     @Override
     @Transactional
-    public void updateOrganization(Long organizationId, Long ownerId, OrganizationUpdateForm form) {
+    public void updateOrganization(Long organizationId, OrganizationUpdateForm form) {
         Organization organization = findOrganization(organizationId);
-        checkOwner(organization, ownerId);
 
         organization.setName(form.getName().trim());
         organization.setDescription(trimToNull(form.getDescription()));
@@ -158,17 +160,15 @@ public class OrganizationServiceImpl implements OrganizationService {
 
     @Override
     @Transactional
-    public void updateStatus(Long organizationId, Long currentUserId, RoleEnum currentUserRole, OrganizationStatus status) {
+    public void updateStatus(Long organizationId, OrganizationStatus status) {
         Organization organization = findOrganization(organizationId);
-        checkManager(organization, currentUserId, currentUserRole);
         organization.setStatus(status);
     }
 
     @Override
     @Transactional
-    public void updateLogo(Long organizationId, Long currentUserId, RoleEnum currentUserRole, MultipartFile logo) {
+    public void updateLogo(Long organizationId, MultipartFile logo) {
         Organization organization = findOrganization(organizationId);
-        checkManager(organization, currentUserId, currentUserRole);
         validateImage(logo, "Выберите файл логотипа");
 
         String fileName = fileStorageService.saveFile(logo);
@@ -179,9 +179,8 @@ public class OrganizationServiceImpl implements OrganizationService {
 
     @Override
     @Transactional
-    public void deleteOrganization(Long organizationId, Long currentUserId, RoleEnum currentUserRole) {
+    public void deleteOrganization(Long organizationId) {
         Organization organization = findOrganization(organizationId);
-        checkManager(organization, currentUserId, currentUserRole);
 
         try {
             organizationRepo.delete(organization);
@@ -194,18 +193,6 @@ public class OrganizationServiceImpl implements OrganizationService {
     private Organization findOrganization(Long organizationId) {
         return organizationRepo.findDetailsById(organizationId)
                 .orElseThrow(() -> new IllegalArgumentException("Организация не найдена"));
-    }
-
-    private void checkOwner(Organization organization, Long userId) {
-        if (!isOwner(organization, userId)) {
-            throw new AccessDeniedException("Редактировать организацию может только владелец");
-        }
-    }
-
-    private void checkManager(Organization organization, Long userId, RoleEnum role) {
-        if (!isOwner(organization, userId) && role != RoleEnum.ADMIN) {
-            throw new AccessDeniedException("Управлять организацией может только владелец или администратор");
-        }
     }
 
     private boolean isOwner(Organization organization, Long userId) {

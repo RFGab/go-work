@@ -56,6 +56,19 @@
     <div class="row g-3">
         <div th:each="room : ${rooms}" class="col-md-6 col-xl-4">
             <article class="border rounded p-3 h-100">
+                <div class="mb-3">
+                    <img th:if="${room.coverImageFileName}"
+                         th:src="@{/img/{fileName}(fileName=${room.coverImageFileName})}"
+                         alt="Фото комнаты"
+                         class="img-fluid rounded border w-100"
+                         style="height: 160px; object-fit: cover;">
+                    <div th:unless="${room.coverImageFileName}"
+                         class="border rounded bg-light text-muted d-flex align-items-center justify-content-center"
+                         style="height: 160px;">
+                        Фото пока нет
+                    </div>
+                </div>
+
                 <div class="d-flex justify-content-between gap-3 mb-2">
                     <h2 class="h5 mb-0">
                         <a th:href="@{/rooms/{id}(id=${room.id})}"

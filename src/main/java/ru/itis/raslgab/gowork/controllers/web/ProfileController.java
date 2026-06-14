@@ -2,6 +2,7 @@ package ru.itis.raslgab.gowork.controllers.web;
 
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
+import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.security.core.annotation.AuthenticationPrincipal;
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
@@ -20,6 +21,7 @@ import ru.itis.raslgab.gowork.services.UserActionLogService;
 
 @Controller
 @RequestMapping("/profile")
+@PreAuthorize("isAuthenticated()")
 @RequiredArgsConstructor
 public class ProfileController {
     private final ProfileService profileService;

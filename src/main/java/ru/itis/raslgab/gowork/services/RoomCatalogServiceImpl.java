@@ -78,7 +78,10 @@ public class RoomCatalogServiceImpl implements RoomCatalogService {
                 .collect(Collectors.groupingBy(BookingIntervalDto::getRoomId));
 
         List<RoomCatalogItemDto> enrichedRooms = rooms.stream()
-                .peek(room -> room.setAvailableHoursToday(calculateAvailableHours(room, intervalsByRoom.get(room.getId()))))
+                .peek(room -> {
+                    room.setAvailableHoursToday(calculateAvailableHours(room, intervalsByRoom.get(room.getId())));
+                    room.setCoverImageFileName(getCoverImageFileName(room.getId()));
+                })
                 .toList();
 
         return new PageImpl<>(
@@ -136,6 +139,11 @@ public class RoomCatalogServiceImpl implements RoomCatalogService {
 
     private LocalDateTime atHour(LocalDate date, int hour) {
         return hour == 24 ? date.plusDays(1).atStartOfDay() : date.atTime(hour, 0);
+    }
+
+    private String getCoverImageFileName(Long roomId) {
+        List<String> fileNames = roomRepo.findImageFileNamesOrderById(roomId, PageRequest.of(0, 1));
+        return fileNames.isEmpty() ? null : fileNames.get(0);
     }
 
     private long mergeAndCountBusyMinutes(List<BookingIntervalDto> intervals,

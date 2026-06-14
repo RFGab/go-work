@@ -2,6 +2,8 @@ package ru.itis.raslgab.gowork.controllers.web;
 
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
+import org.springframework.security.access.prepost.PreAuthorize;
+import org.springframework.security.core.Authentication;
 import org.springframework.format.annotation.DateTimeFormat;
 import org.springframework.security.core.annotation.AuthenticationPrincipal;
 import org.springframework.stereotype.Controller;
@@ -20,6 +22,7 @@ import ru.itis.raslgab.gowork.models.enums.RoomStatus;
 import ru.itis.raslgab.gowork.security.UserDetailsImpl;
 import ru.itis.raslgab.gowork.services.BookingService;
 import ru.itis.raslgab.gowork.services.RoomService;
+import ru.itis.raslgab.gowork.services.RoomSecurityService;
 import ru.itis.raslgab.gowork.services.UserActionLogService;
 
 import java.time.LocalDate;
@@ -32,27 +35,31 @@ import java.util.List;
 public class RoomDetailsController {
     private final RoomService roomService;
     private final BookingService bookingService;
+    private final RoomSecurityService roomSecurityService;
     private final UserActionLogService userActionLogService;
 
     @GetMapping("/{roomId}")
     public String show(@AuthenticationPrincipal UserDetailsImpl userDetails,
+                       Authentication authentication,
                        @PathVariable Long roomId,
                        @RequestParam(required = false)
                        @DateTimeFormat(iso = DateTimeFormat.ISO.DATE) LocalDate bookingDate,
                        Model model) {
         LocalDate selectedDate = bookingDate == null ? currentRoomDate(roomId) : bookingDate;
-        addRoomPageAttributes(userDetails, roomId, selectedDate, model);
+        addRoomPageAttributes(authentication, roomId, selectedDate, model);
         if (!model.containsAttribute("bookingForm")) {
             model.addAttribute("bookingForm", BookingCreateForm.builder()
                     .bookingDate(selectedDate)
                     .build());
         }
-        userActionLogService.log(userDetails.getUserId(), "ROOM_OPEN", "roomId=" + roomId);
+        logIfAuthenticated(userDetails, "ROOM_OPEN", "roomId=" + roomId);
         return "rooms/show";
     }
 
     @PostMapping("/{roomId}/bookings")
+    @PreAuthorize("isAuthenticated()")
     public String createBooking(@AuthenticationPrincipal UserDetailsImpl userDetails,
+                                Authentication authentication,
                                 @PathVariable Long roomId,
                                 @Valid @ModelAttribute("bookingForm") BookingCreateForm form,
                                 BindingResult bindingResult,
@@ -62,7 +69,7 @@ public class RoomDetailsController {
         LocalDate selectedDate = form.getBookingDate() == null ? LocalDate.now() : form.getBookingDate();
 
         if (bindingResult.hasErrors()) {
-            addRoomPageAttributes(userDetails, roomId, selectedDate, model);
+            addRoomPageAttributes(authentication, roomId, selectedDate, model);
             userActionLogService.log(userId, "BOOKING_CREATE_FAILED", "roomId=" + roomId + ", validation errors");
             return "rooms/show";
         }
@@ -74,20 +81,21 @@ public class RoomDetailsController {
             return "redirect:/rooms/" + roomId + "?bookingDate=" + selectedDate;
         } catch (IllegalArgumentException e) {
             bindingResult.reject("booking.invalid", e.getMessage());
-            addRoomPageAttributes(userDetails, roomId, selectedDate, model);
+            addRoomPageAttributes(authentication, roomId, selectedDate, model);
             userActionLogService.log(userId, "BOOKING_CREATE_FAILED", "roomId=" + roomId + ", " + e.getMessage());
             return "rooms/show";
         }
     }
 
     @PostMapping("/{roomId}/images")
+    @PreAuthorize("@roomSecurityService.canManage(#roomId, authentication)")
     public String addImages(@AuthenticationPrincipal UserDetailsImpl userDetails,
                             @PathVariable Long roomId,
                             @RequestParam("images") List<MultipartFile> images,
                             RedirectAttributes redirectAttributes) {
         Long userId = userDetails.getUserId();
         try {
-            roomService.addRoomImages(roomId, userId, userDetails.getUser().getRole(), images);
+            roomService.addRoomImages(roomId, images);
             userActionLogService.log(userId, "ROOM_IMAGES_UPLOAD_SUCCESS", "roomId=" + roomId);
             redirectAttributes.addFlashAttribute("successMessage", "Фото комнаты добавлены");
         } catch (IllegalArgumentException e) {
@@ -97,15 +105,21 @@ public class RoomDetailsController {
         return "redirect:/rooms/" + roomId;
     }
 
-    private void addRoomPageAttributes(UserDetailsImpl userDetails, Long roomId, LocalDate selectedDate, Model model) {
+    private void addRoomPageAttributes(Authentication authentication, Long roomId, LocalDate selectedDate, Model model) {
         var room = roomService.getRoomDetails(roomId);
         model.addAttribute("room", room);
         model.addAttribute("selectedDate", selectedDate);
         model.addAttribute("hourSlots", roomService.getHourSlots(roomId, selectedDate));
         model.addAttribute("options", roomService.getOptions(roomId));
         model.addAttribute("similarRooms", roomService.getSimilarRooms(roomId));
-        model.addAttribute("canManageRoom", roomService.canManageRoom(roomId, userDetails.getUserId(), userDetails.getUser().getRole()));
+        model.addAttribute("canManageRoom", roomSecurityService.canManage(roomId, authentication));
         model.addAttribute("roomStatuses", RoomStatus.values());
+    }
+
+    private void logIfAuthenticated(UserDetailsImpl userDetails, String action, String details) {
+        if (userDetails != null) {
+            userActionLogService.log(userDetails.getUserId(), action, details);
+        }
     }
 
     private LocalDate currentRoomDate(Long roomId) {

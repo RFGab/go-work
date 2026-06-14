@@ -8,11 +8,9 @@ import java.util.List;
 public interface ReviewService {
     List<ReviewItemDto> getOrganizationReviews(Long organizationId, Long currentUserId);
 
-    boolean canCreateReview(Long organizationId, Long currentUserId);
-
     void createReview(Long organizationId, Long currentUserId, ReviewForm form);
 
-    void updateReview(Long reviewId, Long currentUserId, ReviewForm form);
+    void updateReview(Long reviewId, ReviewForm form);
 
-    void deleteReview(Long reviewId, Long currentUserId);
+    void deleteReview(Long reviewId);
 }

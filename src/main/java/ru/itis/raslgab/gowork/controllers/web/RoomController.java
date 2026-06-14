@@ -2,6 +2,7 @@ package ru.itis.raslgab.gowork.controllers.web;
 
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
+import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.security.core.annotation.AuthenticationPrincipal;
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
@@ -15,7 +16,6 @@ import org.springframework.web.servlet.mvc.support.RedirectAttributes;
 import ru.itis.raslgab.gowork.forms.RoomCreateForm;
 import ru.itis.raslgab.gowork.models.enums.RoomStatus;
 import ru.itis.raslgab.gowork.security.UserDetailsImpl;
-import ru.itis.raslgab.gowork.services.OrganizationService;
 import ru.itis.raslgab.gowork.services.RoomService;
 import ru.itis.raslgab.gowork.services.UserActionLogService;
 
@@ -24,14 +24,13 @@ import ru.itis.raslgab.gowork.services.UserActionLogService;
 @RequiredArgsConstructor
 public class RoomController {
     private final RoomService roomService;
-    private final OrganizationService organizationService;
     private final UserActionLogService userActionLogService;
 
     @GetMapping("/new")
+    @PreAuthorize("@organizationSecurityService.isOwner(#organizationId, authentication)")
     public String createForm(@AuthenticationPrincipal UserDetailsImpl userDetails,
                              @PathVariable Long organizationId,
                              Model model) {
-        organizationService.getUpdateForm(organizationId, userDetails.getUserId());
         userActionLogService.log(userDetails.getUserId(), "ROOM_CREATE_OPEN", "organizationId=" + organizationId);
 
         addCreatePageAttributes(organizationId, model);
@@ -46,6 +45,7 @@ public class RoomController {
     }
 
     @PostMapping
+    @PreAuthorize("@organizationSecurityService.isOwner(#organizationId, authentication)")
     public String create(@AuthenticationPrincipal UserDetailsImpl userDetails,
                          @PathVariable Long organizationId,
                          @Valid @ModelAttribute("roomForm") RoomCreateForm form,
@@ -61,7 +61,7 @@ public class RoomController {
         }
 
         try {
-            Long roomId = roomService.createRoom(organizationId, userId, form);
+            Long roomId = roomService.createRoom(organizationId, form);
             userActionLogService.log(userId, "ROOM_CREATE_SUCCESS", "organizationId=" + organizationId + ", roomId=" + roomId);
             redirectAttributes.addFlashAttribute("successMessage", "Комната создана");
             return "redirect:/organizations/" + organizationId;

@@ -25,15 +25,15 @@ public interface OrganizationService {
 
     OrganizationDetailsDto getOrganization(Long organizationId, Long currentUserId, RoleEnum currentUserRole);
 
-    OrganizationUpdateForm getUpdateForm(Long organizationId, Long currentUserId);
+    OrganizationUpdateForm getUpdateForm(Long organizationId);
 
     List<RoomCatalogItemDto> getRooms(Long organizationId);
 
-    void updateOrganization(Long organizationId, Long ownerId, OrganizationUpdateForm form);
+    void updateOrganization(Long organizationId, OrganizationUpdateForm form);
 
-    void updateStatus(Long organizationId, Long currentUserId, RoleEnum currentUserRole, OrganizationStatus status);
+    void updateStatus(Long organizationId, OrganizationStatus status);
 
-    void updateLogo(Long organizationId, Long currentUserId, RoleEnum currentUserRole, MultipartFile logo);
+    void updateLogo(Long organizationId, MultipartFile logo);
 
-    void deleteOrganization(Long organizationId, Long currentUserId, RoleEnum currentUserRole);
+    void deleteOrganization(Long organizationId);
 }

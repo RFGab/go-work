@@ -1,6 +1,7 @@
 package ru.itis.raslgab.gowork.controllers.api;
 
 import lombok.RequiredArgsConstructor;
+import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.security.core.annotation.AuthenticationPrincipal;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.PostMapping;
@@ -24,11 +25,12 @@ public class StatusApiController {
     private final UserActionLogService userActionLogService;
 
     @PostMapping("/organizations/{organizationId}")
+    @PreAuthorize("@organizationSecurityService.canManage(#organizationId, authentication)")
     public AdminActionResponseDto updateOrganizationStatus(@AuthenticationPrincipal UserDetailsImpl userDetails,
                                                            @PathVariable Long organizationId,
                                                            @RequestParam OrganizationStatus status) {
         try {
-            organizationService.updateStatus(organizationId, userDetails.getUserId(), userDetails.getUser().getRole(), status);
+            organizationService.updateStatus(organizationId, status);
             userActionLogService.log(userDetails.getUserId(), "ORGANIZATION_STATUS_UPDATE", "organizationId=" + organizationId + ", status=" + status);
             return success("Статус организации обновлен");
         } catch (Exception e) {
@@ -37,11 +39,12 @@ public class StatusApiController {
     }
 
     @PostMapping("/rooms/{roomId}")
+    @PreAuthorize("@roomSecurityService.canManage(#roomId, authentication)")
     public AdminActionResponseDto updateRoomStatus(@AuthenticationPrincipal UserDetailsImpl userDetails,
                                                    @PathVariable Long roomId,
                                                    @RequestParam RoomStatus status) {
         try {
-            roomService.updateStatus(roomId, userDetails.getUserId(), userDetails.getUser().getRole(), status);
+            roomService.updateStatus(roomId, status);
             userActionLogService.log(userDetails.getUserId(), "ROOM_STATUS_UPDATE", "roomId=" + roomId + ", status=" + status);
             return success("Статус комнаты обновлен");
         } catch (Exception e) {

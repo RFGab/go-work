@@ -26,4 +26,5 @@ public class RoomCatalogItemDto {
     private Integer dayStart;
     private Integer dayEnd;
     private Integer cityUtc;
+    private String coverImageFileName;
 }

@@ -3,6 +3,7 @@ package ru.itis.raslgab.gowork.security;
 import lombok.RequiredArgsConstructor;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
+import org.springframework.http.HttpMethod;
 import org.springframework.security.authentication.dao.DaoAuthenticationProvider;
 import org.springframework.security.config.annotation.method.configuration.EnableMethodSecurity;
 import org.springframework.security.config.annotation.web.builders.HttpSecurity;
@@ -11,7 +12,7 @@ import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.security.web.SecurityFilterChain;
 import org.springframework.security.web.csrf.CookieCsrfTokenRepository;
-
+import org.springframework.security.web.util.matcher.RegexRequestMatcher;
 
 @Configuration
 @EnableWebSecurity
@@ -24,15 +25,15 @@ public class SecurityConfig {
                 .csrf(csrf -> csrf
                         .csrfTokenRepository(CookieCsrfTokenRepository.withHttpOnlyFalse())
                 )
-
-                // настройка доступов
                 .authorizeHttpRequests(auth -> auth
-                        .requestMatchers("/", "/auth/**", "/css/**", "/js/**", "/images/**", "/imgs/**", "/static/**").permitAll()
+                        .requestMatchers("/", "/auth/**", "/error/**", "/css/**", "/js/**", "/images/**", "/imgs/**", "/static/**", "/img/**").permitAll()
                         .requestMatchers("/bookings/*/decision").permitAll()
-                        .requestMatchers("/admin/**").hasRole("ADMIN")  // Будем использовать позже
+                        .requestMatchers(HttpMethod.GET, "/rooms", "/organizations").permitAll()
+                        .requestMatchers(new RegexRequestMatcher("^/rooms/\\d+$", "GET")).permitAll()
+                        .requestMatchers(new RegexRequestMatcher("^/organizations/\\d+$", "GET")).permitAll()
+                        .requestMatchers("/admin/**").hasRole("ADMIN")
                         .anyRequest().authenticated()
                 )
-
                 .formLogin(form -> form
                         .loginPage("/auth/login")
                         .loginProcessingUrl("/auth/login")
@@ -40,8 +41,6 @@ public class SecurityConfig {
                         .failureUrl("/auth/login?error")
                         .permitAll()
                 )
-
-
                 .logout(logout -> logout
                         .logoutUrl("/auth/logout")
                         .logoutSuccessUrl("/?logout")
@@ -49,8 +48,6 @@ public class SecurityConfig {
                         .deleteCookies("JSESSIONID")
                         .permitAll()
                 )
-
-                // Обработка ошибок доступа (403)
                 .exceptionHandling(ex -> ex
                         .accessDeniedHandler((request, response, accessDeniedException) -> {
                             if (request.getRequestURI().startsWith("/img")
@@ -66,7 +63,6 @@ public class SecurityConfig {
                             }
                         })
                 )
-
                 .build();
     }
 
