@@ -13,11 +13,11 @@ import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.servlet.mvc.support.RedirectAttributes;
-import ru.itis.raslgab.gowork.forms.RoomCreateForm;
+import ru.itis.raslgab.gowork.forms.rooms.RoomCreateForm;
 import ru.itis.raslgab.gowork.models.enums.RoomStatus;
 import ru.itis.raslgab.gowork.security.UserDetailsImpl;
-import ru.itis.raslgab.gowork.services.RoomService;
-import ru.itis.raslgab.gowork.services.UserActionLogService;
+import ru.itis.raslgab.gowork.services.rooms.RoomService;
+import ru.itis.raslgab.gowork.services.logging.UserActionLogService;
 
 @Controller
 @RequestMapping("/organizations/{organizationId}/rooms")

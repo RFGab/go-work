@@ -10,7 +10,7 @@ import org.springframework.web.bind.MethodArgumentNotValidException;
 import org.springframework.web.bind.annotation.ExceptionHandler;
 import org.springframework.web.bind.annotation.RestControllerAdvice;
 import org.springframework.web.servlet.resource.NoResourceFoundException;
-import ru.itis.raslgab.gowork.dto.ApiErrorDto;
+import ru.itis.raslgab.gowork.dto.api.ApiErrorDto;
 import ru.itis.raslgab.gowork.exceptions.ServiceException;
 
 import java.time.LocalDateTime;

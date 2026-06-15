@@ -10,8 +10,8 @@ import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestParam;
-import ru.itis.raslgab.gowork.dto.AdminPageDto;
-import ru.itis.raslgab.gowork.services.AdminService;
+import ru.itis.raslgab.gowork.dto.admin.AdminPageDto;
+import ru.itis.raslgab.gowork.services.admin.AdminService;
 
 import java.util.List;
 import java.util.stream.IntStream;

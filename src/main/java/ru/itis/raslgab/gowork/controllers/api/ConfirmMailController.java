@@ -8,8 +8,8 @@ import lombok.extern.slf4j.Slf4j;
 import org.springframework.http.ResponseEntity;
 import org.springframework.validation.annotation.Validated;
 import org.springframework.web.bind.annotation.*;
-import ru.itis.raslgab.gowork.services.MailService;
-import ru.itis.raslgab.gowork.services.UserSecurityService;
+import ru.itis.raslgab.gowork.services.mail.MailService;
+import ru.itis.raslgab.gowork.services.users.UserSecurityService;
 
 @RestController
 @RequestMapping("auth/confirmMail")

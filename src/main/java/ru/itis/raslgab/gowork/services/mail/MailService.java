@@ -1,0 +1,15 @@
+package ru.itis.raslgab.gowork.services.mail;
+
+import ru.itis.raslgab.gowork.dto.bookings.BookingMailDto;
+
+public interface MailService {
+    void sendEmailForConfirm(String email, String code);
+
+    void sendBookingApprovalRequest(BookingMailDto booking);
+
+    void sendBookingRejected(BookingMailDto booking);
+
+    void sendBookingApproved(BookingMailDto booking, byte[] qrCode);
+
+    void sendBookingCancelledToOwner(BookingMailDto booking);
+}

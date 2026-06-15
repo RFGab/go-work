@@ -7,10 +7,10 @@ import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
-import ru.itis.raslgab.gowork.dto.AdminActionResponseDto;
+import ru.itis.raslgab.gowork.dto.api.AdminActionResponseDto;
 import ru.itis.raslgab.gowork.security.UserDetailsImpl;
-import ru.itis.raslgab.gowork.services.BookingService;
-import ru.itis.raslgab.gowork.services.UserActionLogService;
+import ru.itis.raslgab.gowork.services.bookings.BookingService;
+import ru.itis.raslgab.gowork.services.logging.UserActionLogService;
 
 @RestController
 @RequestMapping("/api/bookings")

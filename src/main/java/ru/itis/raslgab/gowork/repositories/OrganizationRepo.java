@@ -5,8 +5,8 @@ import org.springframework.data.domain.Pageable;
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.data.jpa.repository.Query;
 import org.springframework.data.repository.query.Param;
-import ru.itis.raslgab.gowork.dto.OrganizationCatalogItemDto;
-import ru.itis.raslgab.gowork.dto.OrganizationProfileItemDto;
+import ru.itis.raslgab.gowork.dto.organizations.OrganizationCatalogItemDto;
+import ru.itis.raslgab.gowork.dto.organizations.OrganizationProfileItemDto;
 import ru.itis.raslgab.gowork.models.Organization;
 import ru.itis.raslgab.gowork.models.enums.OrganizationStatus;
 
@@ -15,7 +15,7 @@ import java.util.Optional;
 
 public interface OrganizationRepo extends JpaRepository<Organization, Long> {
     @Query("""
-            select new ru.itis.raslgab.gowork.dto.OrganizationProfileItemDto(
+            select new ru.itis.raslgab.gowork.dto.organizations.OrganizationProfileItemDto(
                 o.id,
                 o.name,
                 coalesce(c.name, 'Город не указан'),
@@ -41,7 +41,7 @@ public interface OrganizationRepo extends JpaRepository<Organization, Long> {
     Optional<Organization> findDetailsById(@Param("organizationId") Long organizationId);
 
     @Query("""
-            select new ru.itis.raslgab.gowork.dto.OrganizationCatalogItemDto(
+            select new ru.itis.raslgab.gowork.dto.organizations.OrganizationCatalogItemDto(
                 o.id,
                 o.name,
                 o.description,
@@ -64,7 +64,7 @@ public interface OrganizationRepo extends JpaRepository<Organization, Long> {
                                                       @Param("status") OrganizationStatus status);
 
     @Query(value = """
-            select new ru.itis.raslgab.gowork.dto.OrganizationCatalogItemDto(
+            select new ru.itis.raslgab.gowork.dto.organizations.OrganizationCatalogItemDto(
                 o.id,
                 o.name,
                 o.description,
@@ -95,7 +95,7 @@ public interface OrganizationRepo extends JpaRepository<Organization, Long> {
                                                           Pageable pageable);
 
     @Query(value = """
-            select new ru.itis.raslgab.gowork.dto.OrganizationCatalogItemDto(
+            select new ru.itis.raslgab.gowork.dto.organizations.OrganizationCatalogItemDto(
                 o.id,
                 o.name,
                 o.description,

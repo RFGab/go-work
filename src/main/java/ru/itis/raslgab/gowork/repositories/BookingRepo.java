@@ -3,8 +3,8 @@ package ru.itis.raslgab.gowork.repositories;
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.data.jpa.repository.Query;
 import org.springframework.data.repository.query.Param;
-import ru.itis.raslgab.gowork.dto.BookingIntervalDto;
-import ru.itis.raslgab.gowork.dto.BookingListItemDto;
+import ru.itis.raslgab.gowork.dto.bookings.BookingIntervalDto;
+import ru.itis.raslgab.gowork.dto.bookings.BookingListItemDto;
 import ru.itis.raslgab.gowork.models.Booking;
 import ru.itis.raslgab.gowork.models.enums.BookingStatus;
 
@@ -15,7 +15,7 @@ import java.util.Optional;
 
 public interface BookingRepo extends JpaRepository<Booking, Long> {
     @Query("""
-            select new ru.itis.raslgab.gowork.dto.BookingIntervalDto(
+            select new ru.itis.raslgab.gowork.dto.bookings.BookingIntervalDto(
                 b.room.id,
                 b.timeStart,
                 b.timeFinish
@@ -55,7 +55,7 @@ public interface BookingRepo extends JpaRepository<Booking, Long> {
     Optional<Booking> findDetailsById(@Param("bookingId") Long bookingId);
 
     @Query("""
-            select new ru.itis.raslgab.gowork.dto.BookingListItemDto(
+            select new ru.itis.raslgab.gowork.dto.bookings.BookingListItemDto(
                 b.id,
                 room.id,
                 room.name,

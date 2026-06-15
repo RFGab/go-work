@@ -8,13 +8,13 @@ import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
-import ru.itis.raslgab.gowork.dto.AdminActionResponseDto;
+import ru.itis.raslgab.gowork.dto.api.AdminActionResponseDto;
 import ru.itis.raslgab.gowork.models.enums.OrganizationStatus;
 import ru.itis.raslgab.gowork.models.enums.RoomStatus;
 import ru.itis.raslgab.gowork.security.UserDetailsImpl;
-import ru.itis.raslgab.gowork.services.OrganizationService;
-import ru.itis.raslgab.gowork.services.RoomService;
-import ru.itis.raslgab.gowork.services.UserActionLogService;
+import ru.itis.raslgab.gowork.services.organizations.OrganizationService;
+import ru.itis.raslgab.gowork.services.rooms.RoomService;
+import ru.itis.raslgab.gowork.services.logging.UserActionLogService;
 
 @RestController
 @RequestMapping("/api/status")

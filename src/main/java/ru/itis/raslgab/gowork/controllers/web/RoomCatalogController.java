@@ -10,11 +10,11 @@ import org.springframework.validation.BindingResult;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.ModelAttribute;
 import org.springframework.web.bind.annotation.RequestMapping;
-import ru.itis.raslgab.gowork.dto.RoomCatalogItemDto;
-import ru.itis.raslgab.gowork.forms.RoomCatalogFilterForm;
+import ru.itis.raslgab.gowork.dto.rooms.RoomCatalogItemDto;
+import ru.itis.raslgab.gowork.forms.rooms.RoomCatalogFilterForm;
 import ru.itis.raslgab.gowork.security.UserDetailsImpl;
-import ru.itis.raslgab.gowork.services.RoomCatalogService;
-import ru.itis.raslgab.gowork.services.UserActionLogService;
+import ru.itis.raslgab.gowork.services.rooms.RoomCatalogService;
+import ru.itis.raslgab.gowork.services.logging.UserActionLogService;
 
 import java.util.List;
 import java.util.stream.IntStream;

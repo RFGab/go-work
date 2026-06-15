@@ -11,10 +11,10 @@ import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
-import ru.itis.raslgab.gowork.dto.AdminActionResponseDto;
+import ru.itis.raslgab.gowork.dto.api.AdminActionResponseDto;
 import ru.itis.raslgab.gowork.forms.admin.AdminEntityForm;
 import ru.itis.raslgab.gowork.security.UserDetailsImpl;
-import ru.itis.raslgab.gowork.services.AdminService;
+import ru.itis.raslgab.gowork.services.admin.AdminService;
 
 @RestController
 @RequestMapping("/admin/api")

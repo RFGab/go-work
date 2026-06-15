@@ -14,10 +14,10 @@ import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.multipart.MultipartFile;
 import org.springframework.web.servlet.mvc.support.RedirectAttributes;
-import ru.itis.raslgab.gowork.forms.UserProfileForm;
+import ru.itis.raslgab.gowork.forms.users.UserProfileForm;
 import ru.itis.raslgab.gowork.security.UserDetailsImpl;
-import ru.itis.raslgab.gowork.services.ProfileService;
-import ru.itis.raslgab.gowork.services.UserActionLogService;
+import ru.itis.raslgab.gowork.services.users.ProfileService;
+import ru.itis.raslgab.gowork.services.logging.UserActionLogService;
 
 @Controller
 @RequestMapping("/profile")

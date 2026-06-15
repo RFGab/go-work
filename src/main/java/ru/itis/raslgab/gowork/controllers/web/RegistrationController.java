@@ -12,9 +12,9 @@ import org.springframework.web.bind.annotation.ModelAttribute;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestMapping;
 import ru.itis.raslgab.gowork.exceptions.CreationException;
-import ru.itis.raslgab.gowork.forms.UserRegistrationForm;
-import ru.itis.raslgab.gowork.services.UserActionLogService;
-import ru.itis.raslgab.gowork.services.UserSecurityService;
+import ru.itis.raslgab.gowork.forms.users.UserRegistrationForm;
+import ru.itis.raslgab.gowork.services.logging.UserActionLogService;
+import ru.itis.raslgab.gowork.services.users.UserSecurityService;
 
 @Controller
 @RequestMapping("/auth")

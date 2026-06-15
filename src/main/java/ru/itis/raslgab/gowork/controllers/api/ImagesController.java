@@ -3,7 +3,7 @@ package ru.itis.raslgab.gowork.controllers.api;
 import jakarta.servlet.http.HttpServletResponse;
 import lombok.RequiredArgsConstructor;
 import org.springframework.web.bind.annotation.*;
-import ru.itis.raslgab.gowork.services.FileStorageService;
+import ru.itis.raslgab.gowork.services.files.FileStorageService;
 
 @RestController
 @RequestMapping("/img")

@@ -17,18 +17,18 @@ import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.multipart.MultipartFile;
 import org.springframework.web.servlet.mvc.support.RedirectAttributes;
-import ru.itis.raslgab.gowork.dto.OrganizationDetailsDto;
-import ru.itis.raslgab.gowork.forms.OrganizationCatalogFilterForm;
-import ru.itis.raslgab.gowork.forms.OrganizationCreateForm;
-import ru.itis.raslgab.gowork.forms.OrganizationUpdateForm;
-import ru.itis.raslgab.gowork.forms.ReviewForm;
+import ru.itis.raslgab.gowork.dto.organizations.OrganizationDetailsDto;
+import ru.itis.raslgab.gowork.forms.organizations.OrganizationCatalogFilterForm;
+import ru.itis.raslgab.gowork.forms.organizations.OrganizationCreateForm;
+import ru.itis.raslgab.gowork.forms.organizations.OrganizationUpdateForm;
+import ru.itis.raslgab.gowork.forms.reviews.ReviewForm;
 import ru.itis.raslgab.gowork.models.enums.OrganizationStatus;
 import ru.itis.raslgab.gowork.models.enums.RoleEnum;
 import ru.itis.raslgab.gowork.security.UserDetailsImpl;
-import ru.itis.raslgab.gowork.services.OrganizationService;
-import ru.itis.raslgab.gowork.services.ReviewService;
-import ru.itis.raslgab.gowork.services.ReviewSecurityService;
-import ru.itis.raslgab.gowork.services.UserActionLogService;
+import ru.itis.raslgab.gowork.services.organizations.OrganizationService;
+import ru.itis.raslgab.gowork.services.reviews.ReviewService;
+import ru.itis.raslgab.gowork.services.reviews.ReviewSecurityService;
+import ru.itis.raslgab.gowork.services.logging.UserActionLogService;
 
 import java.util.List;
 

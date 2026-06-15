@@ -5,11 +5,11 @@ import org.springframework.data.domain.Pageable;
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.data.jpa.repository.Query;
 import org.springframework.data.repository.query.Param;
-import ru.itis.raslgab.gowork.dto.RoomDetailsDto;
-import ru.itis.raslgab.gowork.dto.PopularRoomDto;
-import ru.itis.raslgab.gowork.dto.RoomCatalogItemDto;
-import ru.itis.raslgab.gowork.dto.RoomOptionDto;
-import ru.itis.raslgab.gowork.dto.SimilarRoomDto;
+import ru.itis.raslgab.gowork.dto.rooms.RoomDetailsDto;
+import ru.itis.raslgab.gowork.dto.rooms.PopularRoomDto;
+import ru.itis.raslgab.gowork.dto.rooms.RoomCatalogItemDto;
+import ru.itis.raslgab.gowork.dto.rooms.RoomOptionDto;
+import ru.itis.raslgab.gowork.dto.rooms.SimilarRoomDto;
 import ru.itis.raslgab.gowork.models.Room;
 import ru.itis.raslgab.gowork.models.enums.OrganizationStatus;
 import ru.itis.raslgab.gowork.models.enums.RoomStatus;
@@ -19,7 +19,7 @@ import java.util.Optional;
 
 public interface RoomRepo extends JpaRepository<Room, Long> {
     @Query("""
-            select new ru.itis.raslgab.gowork.dto.RoomCatalogItemDto(
+            select new ru.itis.raslgab.gowork.dto.rooms.RoomCatalogItemDto(
                 r.id,
                 r.name,
                 r.description,
@@ -42,7 +42,7 @@ public interface RoomRepo extends JpaRepository<Room, Long> {
     List<RoomCatalogItemDto> findCatalogItemsByOrganizationId(@Param("organizationId") Long organizationId);
 
     @Query(value = """
-            select new ru.itis.raslgab.gowork.dto.RoomCatalogItemDto(
+            select new ru.itis.raslgab.gowork.dto.rooms.RoomCatalogItemDto(
                 r.id,
                 r.name,
                 r.description,
@@ -84,7 +84,7 @@ public interface RoomRepo extends JpaRepository<Room, Long> {
                                                       Pageable pageable);
 
     @Query("""
-            select new ru.itis.raslgab.gowork.dto.RoomDetailsDto(
+            select new ru.itis.raslgab.gowork.dto.rooms.RoomDetailsDto(
                 r.id,
                 r.name,
                 r.description,
@@ -122,7 +122,7 @@ public interface RoomRepo extends JpaRepository<Room, Long> {
     Optional<Room> findByIdWithImages(@Param("roomId") Long roomId);
 
     @Query("""
-            select new ru.itis.raslgab.gowork.dto.RoomOptionDto(
+            select new ru.itis.raslgab.gowork.dto.rooms.RoomOptionDto(
                 opt.id,
                 opt.name,
                 opt.category
@@ -144,7 +144,7 @@ public interface RoomRepo extends JpaRepository<Room, Long> {
     List<String> findImageFileNamesOrderById(@Param("roomId") Long roomId, Pageable pageable);
 
     @Query("""
-            select new ru.itis.raslgab.gowork.dto.SimilarRoomDto(
+            select new ru.itis.raslgab.gowork.dto.rooms.SimilarRoomDto(
                 r.id,
                 r.name,
                 o.name,
@@ -166,7 +166,7 @@ public interface RoomRepo extends JpaRepository<Room, Long> {
                                           @Param("organizationStatus") OrganizationStatus organizationStatus);
 
     @Query("""
-            select new ru.itis.raslgab.gowork.dto.PopularRoomDto(
+            select new ru.itis.raslgab.gowork.dto.rooms.PopularRoomDto(
                 r.id,
                 r.name,
                 o.name,
