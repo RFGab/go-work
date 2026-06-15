@@ -127,16 +127,21 @@ public class AdminServiceImpl implements AdminService {
     public void create(String entity, AdminEntityForm form) {
         switch (entity) {
             case "users" -> throw new IllegalArgumentException("Пользователи должны регистрироваться сами");
-            case "organizations" -> organizationRepo.save(Organization.builder()
-                    .name(required(form.getName()))
-                    .description(trimToNull(form.getDescription()))
-                    .city(getOrCreateCity(form.getCityName()))
-                    .contactEmail(trimToNull(form.getContactEmail()))
-                    .contactPhone(trimToNull(form.getContactPhone()))
-                    .owner(findUser(form.getOwnerId()))
-                    .status(form.getOrganizationStatus() == null ? OrganizationStatus.ACTIVE : form.getOrganizationStatus())
-                    .build());
-            case "rooms" -> roomRepo.save(Room.builder()
+            case "organizations" -> 
+                organizationRepo.save(
+                    Organization.builder()
+                        .name(required(form.getName()))
+                        .description(trimToNull(form.getDescription()))
+                        .city(getOrCreateCity(form.getCityName()))
+                        .contactEmail(trimToNull(form.getContactEmail()))
+                        .contactPhone(trimToNull(form.getContactPhone()))
+                        .owner(findUser(form.getOwnerId()))
+                        .status(form.getOrganizationStatus() == null ? OrganizationStatus.ACTIVE : form.getOrganizationStatus())
+                        .build()
+                );
+            case "rooms" -> 
+                roomRepo.save(
+                    Room.builder()
                     .name(required(form.getName()))
                     .description(trimToNull(form.getDescription()))
                     .peopleCapacity(form.getPeopleCapacity())
@@ -145,8 +150,11 @@ public class AdminServiceImpl implements AdminService {
                     .dayStart(validDayStart(form.getDayStart(), form.getDayEnd()))
                     .dayEnd(validDayEnd(form.getDayStart(), form.getDayEnd()))
                     .status(form.getRoomStatus() == null ? RoomStatus.AVAILABLE : form.getRoomStatus())
-                    .build());
-            case "bookings" -> bookingRepo.save(Booking.builder()
+                    .build()
+                );
+            case "bookings" -> 
+                bookingRepo.save(
+                    Booking.builder()
                     .room(findRoom(form.getRoomId()))
                     .renter(findUser(form.getRenterId()))
                     .timeStart(form.getTimeStart())
@@ -154,21 +162,31 @@ public class AdminServiceImpl implements AdminService {
                     .numOfPeople(form.getNumOfPeople())
                     .comment(trimToNull(form.getComment()))
                     .status(form.getBookingStatus() == null ? BookingStatus.PENDING : form.getBookingStatus())
-                    .build());
-            case "cities" -> cityRepo.save(City.builder()
+                    .build()
+                );
+            case "cities" -> 
+                cityRepo.save(
+                    City.builder()
                     .name(required(form.getName()))
                     .utc(form.getUtc() == null ? 3 : form.getUtc())
-                    .build());
-            case "options" -> optionRepo.save(Option.builder()
+                    .build()
+                );
+            case "options" -> 
+                optionRepo.save(
+                    Option.builder()
                     .name(required(form.getName()))
                     .category(form.getCategory() == null ? OptionCategory.OFFICE_TOOLS : form.getCategory())
-                    .build());
-            case "reviews" -> reviewRepo.save(Review.builder()
+                    .build()
+                );
+            case "reviews" -> 
+                reviewRepo.save(
+                    Review.builder()
                     .author(findUser(form.getAuthorId()))
                     .organization(findOrganization(form.getOrganizationId()))
                     .rating(form.getRating())
                     .text(required(form.getText()))
-                    .build());
+                    .build()
+                );
             default -> throw new IllegalArgumentException("Неизвестный раздел админки");
         }
     }
